@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Minimize2, ExternalLink, BookOpen } from 'lucide-react';
+import { MessageCircle, X, Send, Minimize2, ExternalLink, BookOpen, BoomBox } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -52,7 +52,8 @@ export function ChatWidget() {
 
   const searchArticles = async (query: string): Promise<SearchResult[]> => {
     try {
-      const response = await fetch('/api/search/articles', {
+      const baseUrl = import.meta.env.VITE_API_URL || ''
+      const response = await fetch(`${baseUrl}/api/search/articles`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -65,9 +66,10 @@ export function ChatWidget() {
       }
       
       const data = await response.json();
-      return data.results || [];
+      const results = Array.isArray(data) ? data : (data.results || []);
+      return results as SearchResult[];
     } catch (error) {
-      console.error('Search error:', error);
+      console.error('Search error:', error);BoomBox
       return [];
     }
   };
