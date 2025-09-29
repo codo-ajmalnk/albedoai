@@ -41,14 +41,23 @@ router.post('/articles', async (req, res) => {
 
     const results = fuse.search(query).slice(0, limit);
 
+    const score = (s?: number) => typeof s === 'number' ? s : 1;
+    const toExcerpt = (content?: string | null, fallback?: string | null) => {
+      const text = fallback || '';
+      if (content && content.length > 0) return content.slice(0, 200) + (content.length > 200 ? '...' : '');
+      if (text.length === 0) return '';
+      return text.slice(0, 200) + (text.length > 200 ? '...' : '');
+    };
+
     const searchResults = results.map(result => ({
       id: result.item.id,
       title: result.item.title,
-      excerpt: result.item.excerpt || result.item.content.substring(0, 200) + '...',
+      excerpt: toExcerpt(result.item.excerpt, result.item.content),
       slug: result.item.slug,
+      url: `/docs/${result.item.slug}`,
       category: result.item.category,
-      score: result.score || 1,
-      relevance: (result.score || 1) < 0.3 ? 'high' : (result.score || 1) < 0.6 ? 'medium' : 'low'
+      score: score(result.score),
+      relevance: score(result.score) < 0.3 ? 'high' : score(result.score) < 0.6 ? 'medium' : 'low'
     }));
 
     res.json({ 

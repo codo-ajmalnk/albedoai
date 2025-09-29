@@ -24,12 +24,6 @@ import Users from "./pages/admin/Users";
 import Settings from "./pages/admin/Settings";
 import GettingStarted from "./pages/docs/GettingStarted";
 import FAQ from "./pages/docs/FAQ";
-import Examples from "./pages/docs/Examples";
-import RateLimits from "./pages/docs/RateLimits";
-import Webhooks from "./pages/docs/Webhooks";
-import SDKs from "./pages/docs/SDKs";
-import API from "./pages/docs/API";
-import Auth from "./pages/docs/Auth";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -54,12 +48,7 @@ const App = () => (
                     <Route path="/docs/installation" element={<Installation />} />
                     <Route path="/docs/getting-started" element={<GettingStarted />} />
                     <Route path="/docs/faq" element={<FAQ />} />
-                    <Route path="/docs/examples" element={<Examples />} />
-                    <Route path="/docs/rate-limits" element={<RateLimits />} />
-                    <Route path="/docs/webhooks" element={<Webhooks />} />
-                    <Route path="/docs/sdks" element={<SDKs />} />
-                    <Route path="/docs/api" element={<API />} />
-                    <Route path="/docs/auth" element={<Auth />} />
+                    {/* removed deprecated docs routes */}
                     <Route path="/support" element={<Support />} />
                     <Route path="/support/track/:token" element={<FeedbackTrack />} />
                     <Route path="/admin" element={<AdminDashboard />} />

@@ -18,14 +18,7 @@ export function Header() {
         {/* Left side - Logo and navigation */}
         <div className="flex items-center gap-3 md:gap-6">
           <SidebarTrigger className="md:hidden" />
-          <Link to="/" className="flex items-center space-x-2 md:space-x-3 group">
-            <div className="h-7 w-7 md:h-8 md:w-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-xs md:text-sm">A</span>
-            </div>
-            <span className="font-bold text-lg md:text-xl text-foreground group-hover:text-primary transition-colors">
-              Albedo AI
-            </span>
-          </Link>
+          
           
           {/* Navigation for docs pages */}
           {isDocsPage && (
@@ -35,23 +28,7 @@ export function Header() {
                   "text-sm font-medium px-3 py-2 rounded-md transition-colors",
                   location.pathname === '/' ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
                 )}>
-                  Docs
-                </Link>
-              </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/docs/api" className={cn(
-                  "text-sm font-medium px-3 py-2 rounded-md transition-colors",
-                  location.pathname.startsWith('/docs/api') ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-                )}>
-                  API
-                </Link>
-              </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/docs/examples" className={cn(
-                  "text-sm font-medium px-3 py-2 rounded-md transition-colors",
-                  location.pathname.startsWith('/docs/examples') ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-                )}>
-                  Examples
+                  Documentation
                 </Link>
               </Button>
             </nav>
@@ -82,13 +59,6 @@ export function Header() {
               <MessageCircle className="h-4 w-4" />
               <span className="hidden lg:inline">Support</span>
             </Link>
-          </Button>
-          
-          <Button variant="ghost" size="sm" asChild>
-            <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm">
-              <Github className="h-4 w-4" />
-              <span className="hidden lg:inline">GitHub</span>
-            </a>
           </Button>
           
           <ThemeToggle />

@@ -35,42 +35,16 @@ const categories = [
     icon: Zap,
     articles: [
       { title: 'Installation Guide', href: '/docs/installation', new: true },
-      { title: 'Authentication', href: '/docs/auth' },
       { title: 'First API Call', href: '/docs/first-api-call' },
       { title: 'Configuration', href: '/docs/configuration' },
     ],
   },
   {
-    title: 'API Reference',
-    description: 'Complete API documentation and examples',
+    title: 'Help & Guides',
+    description: 'FAQs and helpful guidance',
     icon: FileText,
     articles: [
-      { title: 'Authentication API', href: '/docs/api/auth' },
-      { title: 'User Management', href: '/docs/api/users' },
-      { title: 'Data Operations', href: '/docs/api/data' },
-      { title: 'Webhooks', href: '/docs/api/webhooks' },
-    ],
-  },
-  {
-    title: 'SDKs & Libraries',
-    description: 'Client libraries and SDKs for popular languages',
-    icon: BookOpen,
-    articles: [
-      { title: 'JavaScript SDK', href: '/docs/sdks/javascript' },
-      { title: 'Python SDK', href: '/docs/sdks/python' },
-      { title: 'React Components', href: '/docs/sdks/react' },
-      { title: 'Node.js SDK', href: '/docs/sdks/nodejs' },
-    ],
-  },
-  {
-    title: 'Examples',
-    description: 'Code examples and tutorials',
-    icon: ExternalLink,
-    articles: [
-      { title: 'Basic Integration', href: '/docs/examples/basic' },
-      { title: 'Advanced Usage', href: '/docs/examples/advanced' },
-      { title: 'Webhook Handling', href: '/docs/examples/webhooks' },
-      { title: 'Error Handling', href: '/docs/examples/errors' },
+      { title: 'FAQ', href: '/docs/faq' },
     ],
   },
 ];
@@ -237,20 +211,7 @@ export default function DocsIndex() {
             </div>
           </a>
           
-          <Link
-            to="/docs/api"
-            className="cursor-docs-card hover:shadow-md transition-all duration-200 group"
-          >
-            <div className="flex items-center gap-4">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <Zap className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <div className="font-semibold group-hover:text-primary transition-colors">API Reference</div>
-                <div className="text-sm text-muted-foreground">Complete API documentation</div>
-              </div>
-            </div>
-          </Link>
+          
         </div>
       </div>
     </div>

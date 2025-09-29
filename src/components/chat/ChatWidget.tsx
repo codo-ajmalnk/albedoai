@@ -19,6 +19,7 @@ interface SearchResult {
   title: string;
   excerpt: string;
   slug: string;
+  url?: string;
   category: {
     name: string;
     color: string;
@@ -56,7 +57,7 @@ export function ChatWidget() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ query, limit: 3 }),
+        body: JSON.stringify({ query, limit: 5 }),
       });
       
       if (!response.ok) {
@@ -98,17 +99,17 @@ export function ChatWidget() {
         const mediumRelevanceResults = searchResults.filter(r => r.relevance === 'medium');
         
         if (highRelevanceResults.length > 0) {
-          responseContent = `I found some relevant information about "${query}":\n\n`;
+          responseContent = `I found relevant documentation for "${query}":\n\n`;
           searchResultsToShow = highRelevanceResults;
         } else if (mediumRelevanceResults.length > 0) {
-          responseContent = `Here are some related articles that might help with "${query}":\n\n`;
+          responseContent = `Here are related articles that might help with "${query}":\n\n`;
           searchResultsToShow = mediumRelevanceResults;
         } else {
           responseContent = `I found some articles that might be related to "${query}":\n\n`;
           searchResultsToShow = searchResults.slice(0, 2);
         }
       } else {
-        responseContent = `I couldn't find specific information about "${query}" in our documentation. However, I can help you in other ways:\n\n• Try rephrasing your question\n• Check our main documentation sections\n• Contact our support team for personalized help\n\nWould you like me to search for something else?`;
+        responseContent = `I couldn't find a direct match for "${query}". Try a simpler phrase or check the docs index.`;
       }
 
       const assistantMessage: Message = {
@@ -234,7 +235,7 @@ export function ChatWidget() {
                                   variant="ghost"
                                   size="sm"
                                   className="h-5 w-5 sm:h-6 sm:w-6 p-0 flex-shrink-0"
-                                  onClick={() => window.open(`/docs/${result.slug}`, '_blank')}
+                                  onClick={() => window.open(result.url || `/docs/${result.slug}`, '_blank')}
                                 >
                                   <ExternalLink className="h-3 w-3" />
                                 </Button>

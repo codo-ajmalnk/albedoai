@@ -14,11 +14,11 @@ const searchData = [
     icon: BookOpen
   },
   {
-    id: 'authentication',
-    title: 'Authentication',
-    description: 'Set up API keys and authentication',
-    url: '/docs/auth',
-    category: 'Getting Started',
+    id: 'faq',
+    title: 'FAQ',
+    description: 'Frequently asked questions',
+    url: '/docs/faq',
+    category: 'Help',
     icon: BookOpen
   },
   {
@@ -29,62 +29,7 @@ const searchData = [
     category: 'Getting Started',
     icon: FileText
   },
-  {
-    id: 'api-reference',
-    title: 'API Reference',
-    description: 'Complete API documentation and examples',
-    url: '/docs/api',
-    category: 'API Reference',
-    icon: FileText
-  },
-  {
-    id: 'javascript-sdk',
-    title: 'JavaScript SDK',
-    description: 'Client library for JavaScript and Node.js',
-    url: '/docs/sdks/javascript',
-    category: 'SDKs & Libraries',
-    icon: BookOpen
-  },
-  {
-    id: 'python-sdk',
-    title: 'Python SDK',
-    description: 'Client library for Python applications',
-    url: '/docs/sdks/python',
-    category: 'SDKs & Libraries',
-    icon: BookOpen
-  },
-  {
-    id: 'webhooks',
-    title: 'Webhooks',
-    description: 'Real-time event notifications',
-    url: '/docs/webhooks',
-    category: 'API Reference',
-    icon: ExternalLink
-  },
-  {
-    id: 'examples',
-    title: 'Examples',
-    description: 'Code examples and tutorials',
-    url: '/docs/examples',
-    category: 'Examples',
-    icon: FileText
-  },
-  {
-    id: 'rate-limits',
-    title: 'Rate Limits',
-    description: 'API usage and limits',
-    url: '/docs/rate-limits',
-    category: 'API Reference',
-    icon: FileText
-  },
-  {
-    id: 'faq',
-    title: 'FAQ',
-    description: 'Frequently asked questions',
-    url: '/docs/faq',
-    category: 'Help',
-    icon: BookOpen
-  }
+  
 ];
 
 interface SearchModalProps {

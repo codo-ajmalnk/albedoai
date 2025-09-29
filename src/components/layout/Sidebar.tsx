@@ -41,36 +41,6 @@ const publicItems = [
     icon: Home,
   },
   { 
-    title: 'Authentication', 
-    url: '/docs/auth', 
-    icon: Shield,
-  },
-  { 
-    title: 'API Reference', 
-    url: '/docs/api', 
-    icon: FileText,
-  },
-  { 
-    title: 'SDKs & Libraries', 
-    url: '/docs/sdks', 
-    icon: BookOpen,
-  },
-  { 
-    title: 'Webhooks', 
-    url: '/docs/webhooks', 
-    icon: MessageSquare,
-  },
-  { 
-    title: 'Rate Limits', 
-    url: '/docs/rate-limits', 
-    icon: CreditCard,
-  },
-  { 
-    title: 'Examples', 
-    url: '/docs/examples', 
-    icon: Users,
-  },
-  { 
     title: 'FAQ', 
     url: '/docs/faq', 
     icon: Settings,
