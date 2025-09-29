@@ -139,10 +139,17 @@ async function networkFirst(request) {
 // Stale-while-revalidate strategy for pages
 async function staleWhileRevalidate(request) {
   const cached = await caches.match(request);
-  const networkPromise = fetch(request).then((response) => {
+  const networkPromise = fetch(request).then(async (response) => {
     if (response.ok) {
-      const cache = caches.open(DYNAMIC_CACHE);
-      cache.then(c => c.put(request, response.clone()));
+      // Clone immediately before the body is consumed by the browser
+      const responseClone = response.clone();
+      try {
+        const cache = await caches.open(DYNAMIC_CACHE);
+        await cache.put(request, responseClone);
+      } catch (e) {
+        // Cache put failures should not block the network response
+        console.warn('SW: Failed to cache (SWR):', e);
+      }
     }
     return response;
   }).catch(() => {

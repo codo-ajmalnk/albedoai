@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Minimize2, ExternalLink, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { LOCAL_DOCS } from '@/data/local-docs';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -50,15 +51,51 @@ export function ChatWidget() {
     scrollToBottom();
   }, [messages]);
 
-  const searchArticles = async (query: string): Promise<SearchResult[]> => {
+  // Lightweight local docs index as a fallback when API is unavailable
+  // Kept in a separate module for easier maintenance
+
+  const localSearch = (query: string, limit = 5): SearchResult[] => {
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+    const scored = LOCAL_DOCS.map((d) => {
+      const title = d.title.toLowerCase();
+      const excerpt = d.excerpt.toLowerCase();
+      let score = 0;
+      if (title.includes(q)) score += 3;
+      if (excerpt.includes(q)) score += 1;
+      const relevance: SearchResult['relevance'] = score >= 3 ? 'high' : score === 2 ? 'medium' : score > 0 ? 'low' : 'low';
+      // Adapt LocalDocItem to SearchResult
+      const doc: SearchResult = {
+        id: d.id,
+        title: d.title,
+        excerpt: d.excerpt,
+        slug: d.slug,
+        url: d.url,
+        category: d.category,
+        relevance,
+      };
+      return { doc, score };
+    })
+      .filter((s) => s.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limit)
+      .map((s) => s.doc);
+    return scored;
+  };
+
+  const searchArticles = async (query: string, timeoutMs = 2000): Promise<SearchResult[]> => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
     try {
       const baseUrl = import.meta.env.VITE_API_URL || ''
+      const controller = new AbortController();
+      timer = setTimeout(() => controller.abort(), timeoutMs);
       const response = await fetch(`${baseUrl}/api/search/articles`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ query, limit: 5 }),
+        signal: controller.signal,
       });
       
       if (!response.ok) {
@@ -67,10 +104,20 @@ export function ChatWidget() {
       
       const data = await response.json();
       const results = Array.isArray(data) ? data : (data.results || []);
-      return results as SearchResult[];
-    } catch (error) {
+      const parsed = (results as SearchResult[]) || [];
+      return parsed.length > 0 ? parsed : localSearch(query);
+    } catch (error: unknown) {
+      // Swallow aborts quietly to keep UI snappy without noisy errors
+      if (error && typeof error === 'object' && (error as any).name === 'AbortError') {
+        // Timeout: try local fallback
+        return localSearch(query);
+      }
       console.error('Search error:', error);
-      return [];
+      // Network error: try local fallback so user still gets a response
+      const local = localSearch(query);
+      return local;
+    } finally {
+      if (timer) clearTimeout(timer);
     }
   };
 
@@ -87,53 +134,55 @@ export function ChatWidget() {
     setMessages(prev => [...prev, userMessage]);
     const query = inputValue;
     setInputValue('');
-    setIsTyping(true);
 
-    try {
-      // Search for relevant articles
-      const searchResults = await searchArticles(query);
-      
-      let responseContent = '';
-      let searchResultsToShow: SearchResult[] = [];
+    // Immediate assistant placeholder; will be updated when results arrive
+    const assistantId = `${Date.now()}-assistant`;
+    const placeholder: Message = {
+      id: assistantId,
+      content: `Searching for "${query}"...`,
+      sender: 'assistant',
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, placeholder]);
 
-      if (searchResults.length > 0) {
-        const highRelevanceResults = searchResults.filter(r => r.relevance === 'high');
-        const mediumRelevanceResults = searchResults.filter(r => r.relevance === 'medium');
-        
-        if (highRelevanceResults.length > 0) {
-          responseContent = `I found relevant documentation for "${query}":\n\n`;
-          searchResultsToShow = highRelevanceResults;
-        } else if (mediumRelevanceResults.length > 0) {
-          responseContent = `Here are related articles that might help with "${query}":\n\n`;
-          searchResultsToShow = mediumRelevanceResults;
+    // Fire-and-forget; allows the user to ask another question immediately
+    (async () => {
+      try {
+        const searchResults = await searchArticles(query);
+
+        let responseContent = '';
+        let searchResultsToShow: SearchResult[] = [];
+
+        if (searchResults.length > 0) {
+          const highRelevanceResults = searchResults.filter(r => r.relevance === 'high');
+          const mediumRelevanceResults = searchResults.filter(r => r.relevance === 'medium');
+
+          if (highRelevanceResults.length > 0) {
+            responseContent = `I found relevant documentation for "${query}":\n\n`;
+            searchResultsToShow = highRelevanceResults;
+          } else if (mediumRelevanceResults.length > 0) {
+            responseContent = `Here are related articles that might help with "${query}":\n\n`;
+            searchResultsToShow = mediumRelevanceResults;
+          } else {
+            responseContent = `I found some articles that might be related to "${query}":\n\n`;
+            searchResultsToShow = searchResults.slice(0, 2);
+          }
         } else {
-          responseContent = `I found some articles that might be related to "${query}":\n\n`;
-          searchResultsToShow = searchResults.slice(0, 2);
+          responseContent = `I couldn't find a direct match for "${query}".`;
         }
-      } else {
-        responseContent = `I couldn't find a direct match for "${query}".`;
-      }
 
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: responseContent,
-        sender: 'assistant',
-        timestamp: new Date(),
-        searchResults: searchResultsToShow,
-      };
-      
-      setMessages(prev => [...prev, assistantMessage]);
-    } catch (error) {
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: `I'm having trouble searching our documentation right now. Please try again in a moment, or contact our support team directly for immediate assistance.`,
-        sender: 'assistant',
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, assistantMessage]);
-    } finally {
-      setIsTyping(false);
-    }
+        setMessages(prev => prev.map(m => m.id === assistantId ? {
+          ...m,
+          content: responseContent,
+          searchResults: searchResultsToShow,
+        } : m));
+      } catch (error) {
+        setMessages(prev => prev.map(m => m.id === assistantId ? {
+          ...m,
+          content: `I'm having trouble searching our documentation right now. Please try again later.`,
+        } : m));
+      }
+    })();
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -249,17 +298,7 @@ export function ChatWidget() {
                     </div>
                   </div>
                 ))}
-                {isTyping && (
-                  <div className="flex justify-start">
-                    <div className="chat-bubble chat-bubble-assistant">
-                      <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-current rounded-full animate-bounce" />
-                        <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                        <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
-                      </div>
-                    </div>
-                  </div>
-                )}
+                {/* Loading indicator intentionally removed for instant replies */}
               </div>
               <div ref={messagesEndRef} />
             </ScrollArea>
