@@ -8,6 +8,8 @@ import { ThemeProvider } from "@/providers/ThemeProvider";
 import { Header } from "@/components/layout/Header";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { ChatWidget } from "@/components/chat/ChatWidget";
+import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
+import { PerformanceMonitor } from "@/components/PerformanceMonitor";
 
 // Pages
 import DocsIndex from "./pages/DocsIndex";
@@ -36,6 +38,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider defaultTheme="system" storageKey="albedo-docs-theme">
       <TooltipProvider>
+        <PerformanceMonitor />
         <Toaster />
         <Sonner />
         <SidebarProvider>
@@ -70,6 +73,7 @@ const App = () => (
                 </main>
               </div>
               <ChatWidget />
+              <PWAInstallPrompt />
             </div>
           </BrowserRouter>
         </SidebarProvider>

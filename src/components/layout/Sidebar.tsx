@@ -229,7 +229,8 @@ export function AppSidebar() {
       <Sidebar 
         className={cn(
           "cursor-docs-sidebar",
-          collapsed ? 'w-16' : 'w-72'
+          collapsed ? 'w-16' : 'w-72',
+          "transition-all duration-300 ease-in-out"
         )} 
         collapsible="icon"
         variant="sidebar"

@@ -73,7 +73,7 @@ export default function FeedbackTrack() {
       case 'OPEN': return 'destructive';
       case 'IN_PROGRESS': return 'default';
       case 'CLOSED': return 'secondary';
-      case 'RESOLVED': return 'success';
+      case 'RESOLVED': return 'secondary';
       default: return 'outline';
     }
   };

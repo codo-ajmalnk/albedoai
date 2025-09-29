@@ -142,22 +142,22 @@ export function ChatWidget() {
 
   if (!isOpen) {
     return (
-      <div className="fixed bottom-4 right-4 z-50">
+      <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50">
         <Button
           onClick={() => setIsOpen(true)}
           size="lg"
-          className="h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-primary hover:scale-105"
+          className="h-12 w-12 md:h-14 md:w-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-primary hover:scale-105 touch-manipulation"
         >
-          <MessageCircle className="h-6 w-6" />
+          <MessageCircle className="h-5 w-5 md:h-6 md:w-6" />
         </Button>
       </div>
     );
   }
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
-      <Card className={`w-96 max-w-[calc(100vw-2rem)] transition-all duration-300 ${
-        isMinimized ? 'h-14' : 'h-[500px]'
+    <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50">
+      <Card className={`w-[calc(100vw-2rem)] max-w-sm md:w-96 transition-all duration-300 ${
+        isMinimized ? 'h-14' : 'h-[60vh] md:h-[500px]'
       } flex flex-col shadow-xl border-0 bg-chat-background`}>
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-chat-border">

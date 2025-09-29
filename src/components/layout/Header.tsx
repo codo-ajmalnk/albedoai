@@ -14,15 +14,15 @@ export function Header() {
 
   return (
     <header className="cursor-docs-header">
-      <div className="container flex h-16 items-center justify-between px-4">
+      <div className="container flex h-14 md:h-16 items-center justify-between px-3 md:px-4">
         {/* Left side - Logo and navigation */}
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-3 md:gap-6">
           <SidebarTrigger className="md:hidden" />
-          <Link to="/" className="flex items-center space-x-3 group">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">A</span>
+          <Link to="/" className="flex items-center space-x-2 md:space-x-3 group">
+            <div className="h-7 w-7 md:h-8 md:w-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-xs md:text-sm">A</span>
             </div>
-            <span className="font-bold text-xl text-foreground group-hover:text-primary transition-colors">
+            <span className="font-bold text-lg md:text-xl text-foreground group-hover:text-primary transition-colors">
               Albedo AI
             </span>
           </Link>
@@ -59,12 +59,12 @@ export function Header() {
         </div>
 
         {/* Center - Search */}
-        <div className="flex-1 max-w-md mx-8">
-          <div className="cursor-docs-search">
+        <div className="hidden sm:flex flex-1 max-w-md mx-4 md:mx-8">
+          <div className="cursor-docs-search w-full">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <button
               onClick={() => setIsSearchOpen(true)}
-              className="cursor-docs-search-input text-left cursor-pointer"
+              className="cursor-docs-search-input text-left cursor-pointer w-full"
             >
               Search documentation...
             </button>
@@ -72,18 +72,22 @@ export function Header() {
         </div>
 
         {/* Right side - Actions */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1 md:gap-3">
+          <Button variant="ghost" size="sm" className="sm:hidden h-8 w-8 p-0" onClick={() => setIsSearchOpen(true)}>
+            <Search className="h-4 w-4" />
+          </Button>
+          
           <Button variant="ghost" size="sm" asChild>
             <Link to="/support" className="flex items-center gap-2 text-sm">
               <MessageCircle className="h-4 w-4" />
-              <span className="hidden sm:inline">Support</span>
+              <span className="hidden lg:inline">Support</span>
             </Link>
           </Button>
           
           <Button variant="ghost" size="sm" asChild>
             <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm">
               <Github className="h-4 w-4" />
-              <span className="hidden sm:inline">GitHub</span>
+              <span className="hidden lg:inline">GitHub</span>
             </a>
           </Button>
           
