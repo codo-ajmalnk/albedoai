@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Minimize2, ExternalLink, BookOpen, BoomBox } from 'lucide-react';
+import { MessageCircle, X, Send, Minimize2, ExternalLink, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -69,7 +69,7 @@ export function ChatWidget() {
       const results = Array.isArray(data) ? data : (data.results || []);
       return results as SearchResult[];
     } catch (error) {
-      console.error('Search error:', error);BoomBox
+      console.error('Search error:', error);
       return [];
     }
   };
