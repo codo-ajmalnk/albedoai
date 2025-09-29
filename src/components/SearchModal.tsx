@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, FileText, BookOpen, ExternalLink, ArrowRight } from 'lucide-react';
+import { Search, FileText, BookOpen, ExternalLink, ArrowRight, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 
 const searchData = [
@@ -80,7 +80,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl w-[95vw] max-h-[85vh] p-0 overflow-hidden sm:w-full sm:max-h-[90vh]">
+      <DialogContent className="max-w-2xl w-[95vw] max-h-[85vh] p-0 overflow-hidden sm:w-full sm:max-h-[90vh] [&>button]:hidden">
         <div className="sr-only">
           <DialogTitle>Search Documentation</DialogTitle>
           <DialogDescription>
@@ -98,6 +98,9 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
               onKeyDown={handleKeyDown}
               className="pl-10 h-10 sm:h-12 text-sm sm:text-base border-0 focus:ring-0"
             />
+            <DialogClose aria-label="Close search" className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring">
+              <X className="h-4 w-4" />
+            </DialogClose>
           </div>
         </div>
 

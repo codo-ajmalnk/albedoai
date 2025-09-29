@@ -366,10 +366,14 @@ export default function Support() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MessageCircle className="h-5 w-5" />
-                Alternative Support
+                Support
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <div className="font-medium text-sm">WhatsApp</div>
+                <div className="text-sm text-foreground-muted">+91 0000000000</div>
+              </div>
               <div className="space-y-2">
                 <div className="font-medium text-sm">Email Support</div>
                 <div className="text-sm text-foreground-muted">support@albedoedu.com</div>
@@ -382,31 +386,6 @@ export default function Support() {
                 <div className="font-medium text-sm">Documentation</div>
                 <div className="text-sm text-foreground-muted">Check our comprehensive docs first</div>
               </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5" />
-                Before You Submit
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2 text-sm">
-                <li className="flex items-start gap-2">
-                  <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2" />
-                  <span>Check our documentation for existing solutions</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2" />
-                  <span>Include relevant error messages or screenshots</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2" />
-                  <span>Provide steps to reproduce the issue</span>
-                </li>
-              </ul>
             </CardContent>
           </Card>
         </div>

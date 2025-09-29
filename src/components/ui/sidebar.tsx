@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -164,6 +164,13 @@ const Sidebar = React.forwardRef<
           }
           side={side}
         >
+          {/* Accessibility components for screen readers */}
+          <div className="sr-only">
+            <SheetTitle>Navigation Menu</SheetTitle>
+            <SheetDescription>
+              Main navigation menu for accessing documentation and administrative features.
+            </SheetDescription>
+          </div>
           <div className="flex h-full w-full flex-col">{children}</div>
         </SheetContent>
       </Sheet>

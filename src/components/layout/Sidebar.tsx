@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, Link } from 'react-router-dom';
 import {
   Sidebar,
   SidebarContent,
@@ -9,7 +9,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar';
 import {
@@ -20,14 +19,15 @@ import {
   Settings,
   BarChart3,
   FileText,
-  Shield,
-  CreditCard,
   Zap,
-  ChevronRight,
-  Menu,
-  X,
+  Search,
+  MessageCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { SidebarFooter, SidebarSeparator } from '@/components/ui/sidebar';
+import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import { SearchModal } from '@/components/SearchModal';
 
 const publicItems = [
   { 
@@ -158,6 +158,7 @@ export function AppSidebar() {
   const currentPath = location.pathname;
   const isAdminRoute = currentPath.startsWith('/admin');
   const collapsed = state === 'collapsed';
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const isActive = (path: string) => {
     if (path === '/') return currentPath === '/';
@@ -182,21 +183,24 @@ export function AppSidebar() {
           collapsed ? 'w-16' : 'w-64 lg:w-72',
           "transition-all duration-300 ease-in-out"
         )} 
-        collapsible="icon"
+        collapsible={isMobile ? "offcanvas" : "icon"}
         variant="sidebar"
       >
         <SidebarContent className="px-3 sm:px-4 py-4 sm:py-6">
           {/* Header Section */}
           {!collapsed && (
             <div className="mb-6 sm:mb-8 px-2">
-              <div className="flex items-center gap-2 sm:gap-3 mb-2">
-                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center flex-shrink-0">
-                  <span className="text-primary-foreground font-bold text-sm sm:text-base">A</span>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center flex-shrink-0">
+                    <span className="text-primary-foreground font-bold text-sm sm:text-base">A</span>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h1 className="text-base sm:text-lg font-semibold text-foreground truncate">Albedo AI</h1>
+                    <p className="text-xs text-muted-foreground truncate">Documentation</p>
+                  </div>
                 </div>
-                <div className="min-w-0 flex-1">
-                  <h1 className="text-base sm:text-lg font-semibold text-foreground truncate">Albedo AI</h1>
-                  <p className="text-xs text-muted-foreground truncate">Documentation</p>
-                </div>
+                <ThemeToggle />
               </div>
             </div>
           )}
@@ -252,8 +256,38 @@ export function AppSidebar() {
               </SidebarGroupContent>
             </SidebarGroup>
           )}
+          {/* Footer actions */}
+          <SidebarSeparator />
+          <SidebarFooter className={cn("mt-auto", collapsed && "items-center")}> 
+            {/* Search trigger */}
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setIsSearchOpen(true)}
+              className={cn("h-9 w-full justify-start", collapsed && "w-9 p-0 justify-center")}
+            >
+              <Search className="h-4 w-4" />
+              {!collapsed && <span className="ml-2">Search</span>}
+            </Button>
+
+            {/* Support link */}
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              asChild 
+              className={cn("h-9 w-full justify-start", collapsed && "w-9 p-0 justify-center")}
+            >
+              <Link to="/support" className="flex items-center">
+                <MessageCircle className="h-4 w-4" />
+                {!collapsed && <span className="ml-2">Support</span>}
+              </Link>
+            </Button>
+
+          </SidebarFooter>
         </SidebarContent>
       </Sidebar>
+      {/* Search Modal */}
+      <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </>
   );
 }

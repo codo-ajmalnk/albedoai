@@ -5,7 +5,6 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/providers/ThemeProvider";
-import { Header } from "@/components/layout/Header";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { ChatWidget } from "@/components/chat/ChatWidget";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
@@ -40,7 +39,6 @@ const App = () => (
             <div className="min-h-screen flex w-full bg-background">
               <AppSidebar />
               <div className="flex-1 flex flex-col cursor-docs-content">
-                <Header />
                 <main className="cursor-docs-main">
                   <Routes>
                     <Route path="/" element={<DocsIndex />} />
