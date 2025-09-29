@@ -13,6 +13,7 @@ interface Message {
   sender: 'user' | 'assistant';
   timestamp: Date;
   searchResults?: SearchResult[];
+  suggestions?: string[];
 }
 
 interface SearchResult {
@@ -53,6 +54,41 @@ export function ChatWidget() {
 
   // Lightweight local docs index as a fallback when API is unavailable
   // Kept in a separate module for easier maintenance
+
+  const DEFAULT_SUGGESTIONS: string[] = [
+    'Getting started',
+    'Installation',
+    'FAQ',
+    'User roles and permissions',
+    'Courses',
+    'Exams',
+    'Notifications',
+    'Billing',
+    'SSO',
+    'Backups'
+  ];
+
+  const normalize = (s: string) => s.trim().toLowerCase();
+
+  const generateSuggestions = (query: string, results: SearchResult[]): string[] => {
+    const q = normalize(query);
+    const looksLikeError = /(err|erro|error|404|not\s+found|fail|failed|crash|bug)/i.test(query);
+
+    if (results.length === 0 || looksLikeError) {
+      const troubleFirst = ['Troubleshooting', 'Audit logs', 'Backups & Restore', 'Security Policies'];
+      const merged = [...troubleFirst, ...DEFAULT_SUGGESTIONS];
+      return Array.from(new Set(merged)).slice(0, 6);
+    }
+
+    const titles = results.map(r => r.title);
+    const categoryHints = results.map(r => r.category?.name).filter(Boolean) as string[];
+    const related = [...titles, ...categoryHints, ...DEFAULT_SUGGESTIONS]
+      .filter(Boolean)
+      .map(t => t.replace(/\s+CRUD$/i, ''))
+      .filter(t => normalize(t) !== q);
+
+    return Array.from(new Set(related)).slice(0, 6);
+  };
 
   const localSearch = (query: string, limit = 5): SearchResult[] => {
     const q = query.trim().toLowerCase();
@@ -121,6 +157,72 @@ export function ChatWidget() {
     }
   };
 
+  const startSearch = (query: string) => {
+    const assistantId = `${Date.now()}-assistant`;
+    const placeholder: Message = {
+      id: assistantId,
+      content: `Searching for "${query}"...`,
+      sender: 'assistant',
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, placeholder]);
+
+    (async () => {
+      try {
+        const searchResults = await searchArticles(query);
+
+        let responseContent = '';
+        let searchResultsToShow: SearchResult[] = [];
+        let suggestionsToShow: string[] = [];
+
+        if (searchResults.length > 0) {
+          const highRelevanceResults = searchResults.filter(r => r.relevance === 'high');
+          const mediumRelevanceResults = searchResults.filter(r => r.relevance === 'medium');
+
+          if (highRelevanceResults.length > 0) {
+            responseContent = `I found relevant documentation for "${query}":\n\n`;
+            searchResultsToShow = highRelevanceResults;
+          } else if (mediumRelevanceResults.length > 0) {
+            responseContent = `Here are related articles that might help with "${query}":\n\n`;
+            searchResultsToShow = mediumRelevanceResults;
+            suggestionsToShow = generateSuggestions(query, mediumRelevanceResults);
+          } else {
+            responseContent = `I found some articles that might be related to "${query}":\n\n`;
+            searchResultsToShow = searchResults.slice(0, 2);
+            suggestionsToShow = generateSuggestions(query, searchResultsToShow);
+          }
+        } else {
+          responseContent = `I couldn't find a direct match for "${query}".`;
+          suggestionsToShow = generateSuggestions(query, []);
+        }
+
+        setMessages(prev => prev.map(m => m.id === assistantId ? {
+          ...m,
+          content: responseContent,
+          searchResults: searchResultsToShow,
+          suggestions: suggestionsToShow,
+        } : m));
+      } catch (error) {
+        setMessages(prev => prev.map(m => m.id === assistantId ? {
+          ...m,
+          content: `I'm having trouble searching our documentation right now. Please try again later.`,
+          suggestions: generateSuggestions(query, []),
+        } : m));
+      }
+    })();
+  };
+
+  const handleSuggestionClick = (suggestion: string) => {
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      content: suggestion,
+      sender: 'user',
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, userMessage]);
+    startSearch(suggestion);
+  };
+
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
 
@@ -135,54 +237,7 @@ export function ChatWidget() {
     const query = inputValue;
     setInputValue('');
 
-    // Immediate assistant placeholder; will be updated when results arrive
-    const assistantId = `${Date.now()}-assistant`;
-    const placeholder: Message = {
-      id: assistantId,
-      content: `Searching for "${query}"...`,
-      sender: 'assistant',
-      timestamp: new Date(),
-    };
-    setMessages(prev => [...prev, placeholder]);
-
-    // Fire-and-forget; allows the user to ask another question immediately
-    (async () => {
-      try {
-        const searchResults = await searchArticles(query);
-
-        let responseContent = '';
-        let searchResultsToShow: SearchResult[] = [];
-
-        if (searchResults.length > 0) {
-          const highRelevanceResults = searchResults.filter(r => r.relevance === 'high');
-          const mediumRelevanceResults = searchResults.filter(r => r.relevance === 'medium');
-
-          if (highRelevanceResults.length > 0) {
-            responseContent = `I found relevant documentation for "${query}":\n\n`;
-            searchResultsToShow = highRelevanceResults;
-          } else if (mediumRelevanceResults.length > 0) {
-            responseContent = `Here are related articles that might help with "${query}":\n\n`;
-            searchResultsToShow = mediumRelevanceResults;
-          } else {
-            responseContent = `I found some articles that might be related to "${query}":\n\n`;
-            searchResultsToShow = searchResults.slice(0, 2);
-          }
-        } else {
-          responseContent = `I couldn't find a direct match for "${query}".`;
-        }
-
-        setMessages(prev => prev.map(m => m.id === assistantId ? {
-          ...m,
-          content: responseContent,
-          searchResults: searchResultsToShow,
-        } : m));
-      } catch (error) {
-        setMessages(prev => prev.map(m => m.id === assistantId ? {
-          ...m,
-          content: `I'm having trouble searching our documentation right now. Please try again later.`,
-        } : m));
-      }
-    })();
+    startSearch(query);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -292,6 +347,22 @@ export function ChatWidget() {
                                 </Button>
                               </div>
                             </div>
+                          ))}
+                        </div>
+                      )}
+                      {/* Suggestions */}
+                      {message.suggestions && message.suggestions.length > 0 && (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {message.suggestions.map((sugg) => (
+                            <Button
+                              key={sugg}
+                              variant="secondary"
+                              size="sm"
+                              className="h-6 px-2 text-xs"
+                              onClick={() => handleSuggestionClick(sugg)}
+                            >
+                              {sugg}
+                            </Button>
                           ))}
                         </div>
                       )}
