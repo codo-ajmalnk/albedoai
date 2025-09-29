@@ -220,6 +220,19 @@ All colors MUST be HSL.
     animation: fadeIn 0.2s ease-out;
   }
 
+  /* Responsive sidebar adjustments */
+  @media (max-width: 768px) {
+    .cursor-docs-sidebar {
+      @apply w-full max-w-sm;
+    }
+  }
+
+  @media (min-width: 769px) and (max-width: 1024px) {
+    .cursor-docs-sidebar {
+      @apply w-64;
+    }
+  }
+
   @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -240,7 +253,8 @@ All colors MUST be HSL.
 
   /* Cursor Docs Specific Styles */
   .cursor-docs-header {
-    @apply sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60;
+    @apply sticky top-0 z-50 w-full border-b border-border/50 bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/80;
+    box-shadow: 0 1px 3px 0 hsl(var(--foreground) / 0.05);
   }
 
   .cursor-docs-sidebar {
@@ -253,7 +267,7 @@ All colors MUST be HSL.
   }
 
   .cursor-docs-main {
-    @apply container mx-auto px-4 py-8 max-w-4xl;
+    @apply container mx-auto px-3 sm:px-4 lg:px-6 py-6 sm:py-8 max-w-4xl;
   }
 
   .cursor-docs-nav-item {
@@ -272,11 +286,16 @@ All colors MUST be HSL.
   }
 
   .cursor-docs-search {
-    @apply relative w-full max-w-md mx-auto;
+    @apply relative w-full max-w-lg mx-auto;
   }
 
   .cursor-docs-search-input {
-    @apply w-full pl-10 pr-4 py-2 border border-input rounded-md bg-background text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent;
+    @apply w-full pl-11 pr-4 py-2.5 border border-input rounded-lg bg-background text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-all duration-200 hover:border-input/80;
+    box-shadow: 0 1px 2px 0 hsl(var(--foreground) / 0.03);
+  }
+
+  .cursor-docs-search-input:hover {
+    box-shadow: 0 2px 4px 0 hsl(var(--foreground) / 0.05);
   }
 
   .cursor-docs-prose {
@@ -372,5 +391,43 @@ All colors MUST be HSL.
     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
     background-color: hsl(var(--primary));
     color: hsl(var(--primary-foreground));
+  }
+
+  /* Professional button enhancements */
+  .cursor-docs-nav-button {
+    @apply relative overflow-hidden transition-all duration-200;
+  }
+
+  .cursor-docs-nav-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, hsl(var(--accent)), transparent);
+    transition: left 0.5s;
+  }
+
+  .cursor-docs-nav-button:hover::before {
+    left: 100%;
+  }
+
+  /* Enhanced focus states */
+  .cursor-docs-focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background;
+  }
+
+  /* Professional shadows */
+  .cursor-docs-shadow-sm {
+    box-shadow: 0 1px 2px 0 hsl(var(--foreground) / 0.05);
+  }
+
+  .cursor-docs-shadow-md {
+    box-shadow: 0 4px 6px -1px hsl(var(--foreground) / 0.1), 0 2px 4px -1px hsl(var(--foreground) / 0.06);
+  }
+
+  .cursor-docs-shadow-lg {
+    box-shadow: 0 10px 15px -3px hsl(var(--foreground) / 0.1), 0 4px 6px -2px hsl(var(--foreground) / 0.05);
   }
 }

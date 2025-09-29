@@ -220,9 +220,6 @@ export default function FAQ() {
             <Button asChild>
               <a href="/support">Contact Support</a>
             </Button>
-            <Button variant="outline" asChild>
-              <a href="/docs/api">API Documentation</a>
-            </Button>
           </div>
         </CardContent>
       </Card>

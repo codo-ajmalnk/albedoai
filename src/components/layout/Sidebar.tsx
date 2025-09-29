@@ -80,24 +80,7 @@ const adminItems = [
   },
 ];
 
-// Mobile Menu Component
-function MobileMenuButton() {
-  const { openMobile, setOpenMobile } = useSidebar();
-  
-  return (
-    <button
-      onClick={() => setOpenMobile(!openMobile)}
-      className="md:hidden fixed top-4 left-4 z-50 p-2.5 rounded-md bg-background border border-border shadow-sm hover:bg-accent hover:text-accent-foreground transition-all duration-200"
-      aria-label="Toggle navigation menu"
-    >
-      {openMobile ? (
-        <X className="h-4 w-4" />
-      ) : (
-        <Menu className="h-4 w-4" />
-      )}
-    </button>
-  );
-}
+// Mobile Menu Component - Removed since we're using SidebarTrigger in Header
 
 // Mobile Overlay Component
 function MobileOverlay() {
@@ -140,7 +123,7 @@ function NavItem({
           data-active={isActive}
           className={cn(
             "cursor-docs-nav-item",
-            "flex items-center gap-3 px-3 py-2.5",
+            "flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 sm:py-2.5",
             "text-sm font-medium transition-all duration-200"
           )}
         >
@@ -151,7 +134,7 @@ function NavItem({
           
           {!collapsed && (
             <div className="flex flex-col min-w-0 flex-1">
-              <span className="truncate font-medium">
+              <span className="truncate font-medium text-sm sm:text-sm">
                 {item.title}
               </span>
               {!isMobile && (
@@ -190,41 +173,38 @@ export function AppSidebar() {
 
   return (
     <>
-      {/* Mobile Menu Button */}
-      <MobileMenuButton />
-      
       {/* Mobile Overlay */}
       <MobileOverlay />
       
       <Sidebar 
         className={cn(
           "cursor-docs-sidebar",
-          collapsed ? 'w-16' : 'w-72',
+          collapsed ? 'w-16' : 'w-64 lg:w-72',
           "transition-all duration-300 ease-in-out"
         )} 
         collapsible="icon"
         variant="sidebar"
       >
-        <SidebarContent className="px-4 py-6">
+        <SidebarContent className="px-3 sm:px-4 py-4 sm:py-6">
           {/* Header Section */}
           {!collapsed && (
-            <div className="mb-8 px-2">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
-                  <span className="text-primary-foreground font-bold text-sm">A</span>
+            <div className="mb-6 sm:mb-8 px-2">
+              <div className="flex items-center gap-2 sm:gap-3 mb-2">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center flex-shrink-0">
+                  <span className="text-primary-foreground font-bold text-sm sm:text-base">A</span>
                 </div>
-                <div>
-                  <h1 className="text-lg font-semibold text-foreground">Albedo AI</h1>
-                  <p className="text-xs text-muted-foreground">Documentation</p>
+                <div className="min-w-0 flex-1">
+                  <h1 className="text-base sm:text-lg font-semibold text-foreground truncate">Albedo AI</h1>
+                  <p className="text-xs text-muted-foreground truncate">Documentation</p>
                 </div>
               </div>
             </div>
           )}
 
           {/* Documentation Section */}
-          <SidebarGroup className="mb-8">
+          <SidebarGroup className="mb-6 sm:mb-8">
             <SidebarGroupLabel className={cn(
-              "text-xs font-semibold uppercase tracking-wider mb-4 px-2",
+              "text-xs font-semibold uppercase tracking-wider mb-3 sm:mb-4 px-2",
               "text-muted-foreground",
               "transition-all duration-200",
               collapsed && "opacity-0 -mt-2"
@@ -250,7 +230,7 @@ export function AppSidebar() {
           {isAdminRoute && (
             <SidebarGroup>
               <SidebarGroupLabel className={cn(
-                "text-xs font-semibold uppercase tracking-wider mb-4 px-2",
+                "text-xs font-semibold uppercase tracking-wider mb-3 sm:mb-4 px-2",
                 "text-muted-foreground",
                 "transition-all duration-200",
                 collapsed && "opacity-0 -mt-2"

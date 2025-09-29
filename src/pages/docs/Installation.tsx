@@ -154,44 +154,6 @@ export default function Installation() {
             </div>
           ))}
         </div>
-
-        <h2>Environment Variables</h2>
-        <p>For production applications, store your API key in environment variables:</p>
-
-        <pre className="cursor-docs-prose pre">
-          <code className="cursor-docs-prose code">{`# .env
-ALBEDO_API_KEY=your-api-key-here
-
-# .env.local (for local development)
-ALBEDO_API_KEY=your-development-api-key`}</code>
-        </pre>
-
-        <div className="cursor-docs-card mt-8">
-          <h3 className="text-lg font-semibold mb-4">Next Steps</h3>
-          <div className="space-y-3">
-            <Link 
-              to="/docs/auth" 
-              className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors"
-            >
-              <span>Authentication & API Keys</span>
-              <ExternalLink className="h-4 w-4" />
-            </Link>
-            <Link 
-              to="/docs/first-api-call" 
-              className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors"
-            >
-              <span>Making Your First API Call</span>
-              <ExternalLink className="h-4 w-4" />
-            </Link>
-            <Link 
-              to="/docs/api" 
-              className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors"
-            >
-              <span>API Reference</span>
-              <ExternalLink className="h-4 w-4" />
-            </Link>
-          </div>
-        </div>
       </div>
     </div>
   );

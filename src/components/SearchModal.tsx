@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Search, FileText, BookOpen, ExternalLink, ArrowRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 
 const searchData = [
@@ -81,6 +81,12 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl w-[95vw] max-h-[85vh] p-0 overflow-hidden sm:w-full sm:max-h-[90vh]">
+        <div className="sr-only">
+          <DialogTitle>Search Documentation</DialogTitle>
+          <DialogDescription>
+            Search through Albedo AI documentation. Use arrow keys to navigate results, Enter to select, and Escape to close.
+          </DialogDescription>
+        </div>
         <div className="p-4 sm:p-6 border-b">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
