@@ -156,31 +156,31 @@ export function ChatWidget() {
 
   return (
     <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50">
-      <Card className={`w-[calc(100vw-2rem)] max-w-sm md:w-96 transition-all duration-300 ${
-        isMinimized ? 'h-14' : 'h-[60vh] md:h-[500px]'
+      <Card className={`w-[calc(100vw-1rem)] sm:w-[calc(100vw-2rem)] max-w-sm md:w-96 transition-all duration-300 ${
+        isMinimized ? 'h-12 sm:h-14' : 'h-[70vh] sm:h-[60vh] md:h-[500px]'
       } flex flex-col shadow-xl border-0 bg-chat-background`}>
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-chat-border">
+        <div className="flex items-center justify-between p-3 sm:p-4 border-b border-chat-border">
           <div className="flex items-center gap-2">
-            <div className="h-3 w-3 rounded-full bg-success animate-pulse" />
-            <span className="font-medium text-sm">Support Assistant</span>
+            <div className="h-2 w-2 sm:h-3 sm:w-3 rounded-full bg-success animate-pulse" />
+            <span className="font-medium text-xs sm:text-sm">Support Assistant</span>
           </div>
           <div className="flex items-center gap-1">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setIsMinimized(!isMinimized)}
-              className="h-8 w-8 p-0"
+              className="h-6 w-6 sm:h-8 sm:w-8 p-0"
             >
-              <Minimize2 className="h-4 w-4" />
+              <Minimize2 className="h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setIsOpen(false)}
-              className="h-8 w-8 p-0"
+              className="h-6 w-6 sm:h-8 sm:w-8 p-0"
             >
-              <X className="h-4 w-4" />
+              <X className="h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
           </div>
         </div>
@@ -188,8 +188,8 @@ export function ChatWidget() {
         {!isMinimized && (
           <>
             {/* Messages */}
-            <ScrollArea className="flex-1 p-4">
-              <div className="space-y-4">
+            <ScrollArea className="flex-1 p-3 sm:p-4">
+              <div className="space-y-3 sm:space-y-4">
                 {messages.map((message) => (
                   <div
                     key={message.id}
@@ -210,14 +210,14 @@ export function ChatWidget() {
                               key={result.id}
                               className="p-3 bg-background/50 rounded-lg border border-border/50 hover:bg-background/80 transition-colors"
                             >
-                              <div className="flex items-start justify-between gap-2">
+                           <div className="flex items-start justify-between gap-2">
                                 <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 mb-1">
+                                  <div className="flex items-center gap-1 sm:gap-2 mb-1">
                                     <BookOpen className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-                                    <span className="font-medium text-sm truncate">{result.title}</span>
+                                    <span className="font-medium text-xs sm:text-sm truncate">{result.title}</span>
                                     <Badge 
                                       variant="outline" 
-                                      className="text-xs"
+                                      className="text-xs hidden sm:inline-flex"
                                       style={{ 
                                         borderColor: result.category.color,
                                         color: result.category.color 
@@ -233,7 +233,7 @@ export function ChatWidget() {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="h-6 w-6 p-0 flex-shrink-0"
+                                  className="h-5 w-5 sm:h-6 sm:w-6 p-0 flex-shrink-0"
                                   onClick={() => window.open(`/docs/${result.slug}`, '_blank')}
                                 >
                                   <ExternalLink className="h-3 w-3" />
@@ -262,17 +262,17 @@ export function ChatWidget() {
             </ScrollArea>
 
             {/* Input */}
-            <div className="p-4 border-t border-chat-border">
+            <div className="p-3 sm:p-4 border-t border-chat-border">
               <div className="flex gap-2">
                 <Input
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder="Ask about our documentation..."
-                  className="flex-1"
+                  className="flex-1 text-sm"
                 />
-                <Button onClick={handleSendMessage} size="sm" disabled={!inputValue.trim()}>
-                  <Send className="h-4 w-4" />
+                <Button onClick={handleSendMessage} size="sm" disabled={!inputValue.trim()} className="h-8 w-8 sm:h-10 sm:w-10 p-0">
+                  <Send className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
               </div>
             </div>

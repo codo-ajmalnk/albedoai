@@ -135,8 +135,8 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl p-0 overflow-hidden">
-        <div className="p-6 border-b">
+      <DialogContent className="max-w-2xl w-[95vw] max-h-[85vh] p-0 overflow-hidden sm:w-full sm:max-h-[90vh]">
+        <div className="p-4 sm:p-6 border-b">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -145,72 +145,72 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="pl-10 h-12 text-base border-0 focus:ring-0"
+              className="pl-10 h-10 sm:h-12 text-sm sm:text-base border-0 focus:ring-0"
             />
           </div>
         </div>
 
-        <div className="max-h-96 overflow-y-auto">
+        <div className="max-h-60 sm:max-h-96 overflow-y-auto">
           {query === '' ? (
-            <div className="p-6 text-center text-muted-foreground">
-              <Search className="h-8 w-8 mx-auto mb-3 opacity-50" />
-              <p>Start typing to search documentation...</p>
+            <div className="p-4 sm:p-6 text-center text-muted-foreground">
+              <Search className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-3 opacity-50" />
+              <p className="text-sm sm:text-base">Start typing to search documentation...</p>
             </div>
           ) : filteredResults.length === 0 ? (
-            <div className="p-6 text-center text-muted-foreground">
-              <p>No results found for "{query}"</p>
+            <div className="p-4 sm:p-6 text-center text-muted-foreground">
+              <p className="text-sm sm:text-base">No results found for "{query}"</p>
             </div>
           ) : (
             <div className="p-2">
               {filteredResults.map((result, index) => {
                 const Icon = result.icon;
                 return (
-                  <a
-                    key={result.id}
-                    href={result.url}
-                    className={cn(
-                      "flex items-center gap-4 p-3 rounded-lg transition-colors cursor-pointer",
-                      index === selectedIndex
-                        ? "bg-accent text-accent-foreground"
-                        : "hover:bg-muted/50"
-                    )}
-                    onMouseEnter={() => setSelectedIndex(index)}
-                  >
-                    <div className="p-2 rounded-lg bg-primary/10">
-                      <Icon className="h-4 w-4 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm">{result.title}</div>
-                      <div className="text-xs text-muted-foreground truncate">
-                        {result.description}
+                    <a
+                      key={result.id}
+                      href={result.url}
+                      className={cn(
+                        "flex items-center gap-3 sm:gap-4 p-2 sm:p-3 rounded-lg transition-colors cursor-pointer",
+                        index === selectedIndex
+                          ? "bg-accent text-accent-foreground"
+                          : "hover:bg-muted/50"
+                      )}
+                      onMouseEnter={() => setSelectedIndex(index)}
+                    >
+                      <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10 shrink-0">
+                        <Icon className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
                       </div>
-                      <div className="text-xs text-muted-foreground mt-1">
-                        {result.category}
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-xs sm:text-sm">{result.title}</div>
+                        <div className="text-xs text-muted-foreground truncate">
+                          {result.description}
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1 hidden sm:block">
+                          {result.category}
+                        </div>
                       </div>
-                    </div>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                  </a>
+                      <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground shrink-0" />
+                    </a>
                 );
               })}
             </div>
           )}
         </div>
 
-        <div className="p-4 border-t bg-muted/30 text-xs text-muted-foreground">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+        <div className="p-3 sm:p-4 border-t bg-muted/30 text-xs text-muted-foreground">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 sm:gap-4">
               <span className="flex items-center gap-1">
-                <kbd className="px-1.5 py-0.5 text-xs bg-background border rounded">↑↓</kbd>
-                to navigate
+                <kbd className="px-1 sm:px-1.5 py-0.5 text-xs bg-background border rounded">↑↓</kbd>
+                <span className="hidden sm:inline">to navigate</span>
               </span>
               <span className="flex items-center gap-1">
-                <kbd className="px-1.5 py-0.5 text-xs bg-background border rounded">↵</kbd>
-                to select
+                <kbd className="px-1 sm:px-1.5 py-0.5 text-xs bg-background border rounded">↵</kbd>
+                <span className="hidden sm:inline">to select</span>
               </span>
             </div>
             <span className="flex items-center gap-1">
-              <kbd className="px-1.5 py-0.5 text-xs bg-background border rounded">esc</kbd>
-              to close
+              <kbd className="px-1 sm:px-1.5 py-0.5 text-xs bg-background border rounded">esc</kbd>
+              <span className="hidden sm:inline">to close</span>
             </span>
           </div>
         </div>
