@@ -33,7 +33,7 @@ export function ChatWidget() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      content: 'Hello! I\'m here to help you with Albedo documentation. What can I assist you with today?',
+      content: 'Hello! I\'m here to help you with Albedo documentation.',
       sender: 'assistant',
       timestamp: new Date(),
     },
@@ -109,7 +109,7 @@ export function ChatWidget() {
           searchResultsToShow = searchResults.slice(0, 2);
         }
       } else {
-        responseContent = `I couldn't find a direct match for "${query}". Try a simpler phrase or check the docs index.`;
+        responseContent = `I couldn't find a direct match for "${query}".`;
       }
 
       const assistantMessage: Message = {
@@ -269,7 +269,7 @@ export function ChatWidget() {
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Ask about our documentation..."
+                  placeholder="Ask anything"
                   className="flex-1 text-sm"
                 />
                 <Button onClick={handleSendMessage} size="sm" disabled={!inputValue.trim()} className="h-8 w-8 sm:h-10 sm:w-10 p-0">
