@@ -9,6 +9,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarHeader,
   useSidebar,
 } from '@/components/ui/sidebar';
 import {
@@ -186,25 +187,25 @@ export function AppSidebar() {
         collapsible={isMobile ? "offcanvas" : "icon"}
         variant="sidebar"
       >
-        <SidebarContent className="px-3 sm:px-4 py-4 sm:py-6">
-          {/* Header Section */}
-          {!collapsed && (
-            <div className="mb-6 sm:mb-8 px-2">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center flex-shrink-0">
-                    <span className="text-primary-foreground font-bold text-sm sm:text-base">A</span>
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <h1 className="text-base sm:text-lg font-semibold text-foreground truncate">Albedo AI</h1>
-                    <p className="text-xs text-muted-foreground truncate">Documentation</p>
-                  </div>
+        {/* Sticky header (outside scrollable content) */}
+        {!collapsed && (
+          <SidebarHeader className="px-3 sm:px-4 pt-4 sm:pt-6 pb-3 sm:pb-4 sticky top-0 z-10 bg-sidebar">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center flex-shrink-0">
+                  <span className="text-primary-foreground font-bold text-sm sm:text-base">A</span>
                 </div>
-                <ThemeToggle />
+                <div className="min-w-0 flex-1">
+                  <h1 className="text-base sm:text-lg font-semibold text-foreground truncate">Albedo AI</h1>
+                  <p className="text-xs text-muted-foreground truncate">Documentation</p>
+                </div>
               </div>
+              <ThemeToggle />
             </div>
-          )}
+          </SidebarHeader>
+        )}
 
+        <SidebarContent className="px-3 sm:px-4 py-4 sm:py-6">
           {/* Documentation Section */}
           <SidebarGroup className="mb-6 sm:mb-8">
             <SidebarGroupLabel className={cn(

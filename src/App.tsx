@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/providers/ThemeProvider";
@@ -39,6 +39,10 @@ const App = () => (
             <div className="min-h-screen flex w-full bg-background">
               <AppSidebar />
               <div className="flex-1 flex flex-col cursor-docs-content">
+                  {/* Mobile/Tablet sidebar trigger */}
+                  <div className="md:hidden fixed top-4 left-4 z-50">
+                    <SidebarTrigger aria-label="Open navigation" />
+                  </div>
                 <main className="cursor-docs-main">
                   <Routes>
                     <Route path="/" element={<DocsIndex />} />
