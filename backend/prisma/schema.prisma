@@ -1,0 +1,151 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      UserRole @default(SUPPORT_AGENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  feedbackReplies FeedbackReply[]
+  internalNotes   InternalNote[]
+
+  @@map("users")
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  icon        String?
+  color       String?
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  articles  Article[]
+  feedbacks Feedback[]
+
+  @@map("categories")
+}
+
+model Article {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  content     String
+  excerpt     String?
+  tags        String[]
+  isPublished Boolean  @default(false)
+  isFeatured  Boolean  @default(false)
+  viewCount   Int      @default(0)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@map("articles")
+}
+
+model Feedback {
+  id          String        @id @default(cuid())
+  email       String
+  name        String?
+  subject     String
+  message     String
+  status      FeedbackStatus @default(OPEN)
+  priority    Priority      @default(MEDIUM)
+  categoryId  String?
+  token       String        @unique @default(cuid())
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  category   Category?        @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  replies    FeedbackReply[]
+  notes      InternalNote[]
+
+  @@map("feedback")
+}
+
+model FeedbackReply {
+  id         String   @id @default(cuid())
+  content    String
+  isInternal Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  feedbackId String
+  feedback   Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("feedback_replies")
+}
+
+model InternalNote {
+  id         String   @id @default(cuid())
+  content    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  feedbackId String
+  feedback   Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("internal_notes")
+}
+
+model Analytics {
+  id        String   @id @default(cuid())
+  date      DateTime @default(now())
+  metric    String
+  value     Int
+  metadata  Json?
+
+  @@map("analytics")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  SUPPORT_AGENT
+  VIEWER
+}
+
+enum FeedbackStatus {
+  OPEN
+  IN_PROGRESS
+  CLOSED
+  RESOLVED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}

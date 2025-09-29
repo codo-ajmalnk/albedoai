@@ -1,9 +1,32 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, BookOpen, Zap, Shield, CreditCard, FileText, ArrowRight } from 'lucide-react';
+import { Search, BookOpen, Zap, Shield, CreditCard, FileText, ArrowRight, Github, ExternalLink, ChevronRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+
+const quickStart = [
+  {
+    title: 'Installation',
+    description: 'Get started with Albedo AI in minutes',
+    href: '/docs/installation',
+    icon: Zap,
+    new: true,
+  },
+  {
+    title: 'Authentication',
+    description: 'Set up API keys and authentication',
+    href: '/docs/auth',
+    icon: Shield,
+  },
+  {
+    title: 'First API Call',
+    description: 'Make your first request to our API',
+    href: '/docs/first-api-call',
+    icon: FileText,
+  },
+];
 
 const categories = [
   {
@@ -12,7 +35,8 @@ const categories = [
     icon: Zap,
     articles: [
       { title: 'Installation Guide', href: '/docs/installation', new: true },
-      { title: 'First Steps', href: '/docs/first-steps' },
+      { title: 'Authentication', href: '/docs/auth' },
+      { title: 'First API Call', href: '/docs/first-api-call' },
       { title: 'Configuration', href: '/docs/configuration' },
     ],
   },
@@ -24,26 +48,29 @@ const categories = [
       { title: 'Authentication API', href: '/docs/api/auth' },
       { title: 'User Management', href: '/docs/api/users' },
       { title: 'Data Operations', href: '/docs/api/data' },
+      { title: 'Webhooks', href: '/docs/api/webhooks' },
     ],
   },
   {
-    title: 'Authentication',
-    description: 'User authentication and security features',
-    icon: Shield,
+    title: 'SDKs & Libraries',
+    description: 'Client libraries and SDKs for popular languages',
+    icon: BookOpen,
     articles: [
-      { title: 'OAuth Setup', href: '/docs/auth/oauth' },
-      { title: 'JWT Tokens', href: '/docs/auth/jwt' },
-      { title: 'Two-Factor Auth', href: '/docs/auth/2fa' },
+      { title: 'JavaScript SDK', href: '/docs/sdks/javascript' },
+      { title: 'Python SDK', href: '/docs/sdks/python' },
+      { title: 'React Components', href: '/docs/sdks/react' },
+      { title: 'Node.js SDK', href: '/docs/sdks/nodejs' },
     ],
   },
   {
-    title: 'Billing & Payments',
-    description: 'Subscription management and payment processing',
-    icon: CreditCard,
+    title: 'Examples',
+    description: 'Code examples and tutorials',
+    icon: ExternalLink,
     articles: [
-      { title: 'Subscription Plans', href: '/docs/billing/plans' },
-      { title: 'Payment Methods', href: '/docs/billing/payments' },
-      { title: 'Invoicing', href: '/docs/billing/invoices' },
+      { title: 'Basic Integration', href: '/docs/examples/basic' },
+      { title: 'Advanced Usage', href: '/docs/examples/advanced' },
+      { title: 'Webhook Handling', href: '/docs/examples/webhooks' },
+      { title: 'Error Handling', href: '/docs/examples/errors' },
     ],
   },
 ];
@@ -60,86 +87,136 @@ export default function DocsIndex() {
   );
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="cursor-docs-main">
       {/* Hero Section */}
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
-          Albedo Documentation
-        </h1>
-        <p className="text-xl text-foreground-muted mb-8 max-w-2xl mx-auto">
-          Everything you need to know about using Albedo. From quick starts to advanced features.
-        </p>
-        
-        {/* Search */}
-        <div className="relative max-w-md mx-auto">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-foreground-muted" />
-          <Input
-            placeholder="Search documentation..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 h-12"
-          />
+      <div className="mb-16">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold tracking-tight mb-4 text-foreground">
+            Albedo AI Documentation
+          </h1>
+          <p className="text-xl text-muted-foreground mb-8 max-w-3xl">
+            Everything you need to know about using Albedo AI. From quick starts to advanced features and API reference.
+          </p>
+          
+          {/* Search */}
+          <div className="relative max-w-lg">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search documentation..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 h-12 text-base"
+            />
+          </div>
         </div>
-      </div>
 
-      {/* Categories Grid */}
-      <div className="grid gap-8 md:grid-cols-2">
-        {filteredCategories.map((category) => {
-          const Icon = category.icon;
-          return (
-            <Card key={category.title} className="group hover:shadow-md transition-all duration-200">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary-subtle">
-                    <Icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg">{category.title}</CardTitle>
-                    <CardDescription>{category.description}</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {category.articles.map((article) => (
-                    <Link
-                      key={article.href}
-                      to={article.href}
-                      className="flex items-center justify-between p-3 rounded-lg hover:bg-secondary transition-colors group"
-                    >
-                      <div className="flex items-center gap-3">
-                        <BookOpen className="h-4 w-4 text-foreground-muted" />
-                        <span className="font-medium">{article.title}</span>
-                        {article.new && (
+        {/* Quick Start */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-semibold tracking-tight mb-6">Quick Start</h2>
+          <div className="grid gap-4 md:grid-cols-3">
+            {quickStart.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  className="cursor-docs-card hover:shadow-md transition-all duration-200 group"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <Icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                          {item.title}
+                        </h3>
+                        {item.new && (
                           <Badge variant="secondary" className="text-xs">
                             New
                           </Badge>
                         )}
                       </div>
-                      <ArrowRight className="h-4 w-4 text-foreground-muted group-hover:translate-x-1 transition-transform" />
-                    </Link>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+                      <p className="text-sm text-muted-foreground mb-3">
+                        {item.description}
+                      </p>
+                      <div className="flex items-center text-sm text-primary group-hover:gap-2 transition-all">
+                        <span>Get started</span>
+                        <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
-      {/* Quick Links */}
-      <div className="mt-16 p-8 rounded-xl bg-gradient-subtle border">
-        <h2 className="text-2xl font-semibold mb-6 text-center">Need Help?</h2>
+      {/* Documentation Sections */}
+      <div className="space-y-12">
+        <h2 className="text-2xl font-semibold tracking-tight">Documentation</h2>
+        
+        <div className="grid gap-8 md:grid-cols-2">
+          {filteredCategories.map((category) => {
+            const Icon = category.icon;
+            return (
+              <Card key={category.title} className="group hover:shadow-md transition-all duration-200">
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <Icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg">{category.title}</CardTitle>
+                      <CardDescription>{category.description}</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {category.articles.map((article) => (
+                      <Link
+                        key={article.href}
+                        to={article.href}
+                        className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors group"
+                      >
+                        <div className="flex items-center gap-3">
+                          <BookOpen className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium text-sm">{article.title}</span>
+                          {article.new && (
+                            <Badge variant="secondary" className="text-xs">
+                              New
+                            </Badge>
+                          )}
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+                      </Link>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Help Section */}
+      <div className="mt-16">
+        <h2 className="text-2xl font-semibold tracking-tight mb-8">Need Help?</h2>
         <div className="grid gap-4 md:grid-cols-3">
           <Link
             to="/support"
-            className="flex items-center gap-3 p-4 rounded-lg bg-background hover:bg-secondary transition-colors"
+            className="cursor-docs-card hover:shadow-md transition-all duration-200 group"
           >
-            <div className="p-2 rounded-lg bg-primary-subtle">
-              <FileText className="h-4 w-4 text-primary" />
-            </div>
-            <div>
-              <div className="font-medium">Contact Support</div>
-              <div className="text-sm text-foreground-muted">Get help from our team</div>
+            <div className="flex items-center gap-4">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <FileText className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <div className="font-semibold group-hover:text-primary transition-colors">Contact Support</div>
+                <div className="text-sm text-muted-foreground">Get help from our team</div>
+              </div>
             </div>
           </Link>
           
@@ -147,27 +224,31 @@ export default function DocsIndex() {
             href="https://github.com/albedoedu"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 p-4 rounded-lg bg-background hover:bg-secondary transition-colors"
+            className="cursor-docs-card hover:shadow-md transition-all duration-200 group"
           >
-            <div className="p-2 rounded-lg bg-primary-subtle">
-              <BookOpen className="h-4 w-4 text-primary" />
-            </div>
-            <div>
-              <div className="font-medium">GitHub</div>
-              <div className="text-sm text-foreground-muted">View source code</div>
+            <div className="flex items-center gap-4">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Github className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <div className="font-semibold group-hover:text-primary transition-colors">GitHub</div>
+                <div className="text-sm text-muted-foreground">View source code and examples</div>
+              </div>
             </div>
           </a>
           
           <Link
             to="/docs/api"
-            className="flex items-center gap-3 p-4 rounded-lg bg-background hover:bg-secondary transition-colors"
+            className="cursor-docs-card hover:shadow-md transition-all duration-200 group"
           >
-            <div className="p-2 rounded-lg bg-primary-subtle">
-              <Zap className="h-4 w-4 text-primary" />
-            </div>
-            <div>
-              <div className="font-medium">API Reference</div>
-              <div className="text-sm text-foreground-muted">Explore our API</div>
+            <div className="flex items-center gap-4">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Zap className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <div className="font-semibold group-hover:text-primary transition-colors">API Reference</div>
+                <div className="text-sm text-muted-foreground">Complete API documentation</div>
+              </div>
             </div>
           </Link>
         </div>

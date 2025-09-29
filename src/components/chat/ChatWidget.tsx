@@ -1,15 +1,29 @@
 import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Minimize2 } from 'lucide-react';
+import { MessageCircle, X, Send, Minimize2, ExternalLink, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
 
 interface Message {
   id: string;
   content: string;
   sender: 'user' | 'assistant';
   timestamp: Date;
+  searchResults?: SearchResult[];
+}
+
+interface SearchResult {
+  id: string;
+  title: string;
+  excerpt: string;
+  slug: string;
+  category: {
+    name: string;
+    color: string;
+  };
+  relevance: 'high' | 'medium' | 'low';
 }
 
 export function ChatWidget() {
@@ -35,6 +49,28 @@ export function ChatWidget() {
     scrollToBottom();
   }, [messages]);
 
+  const searchArticles = async (query: string): Promise<SearchResult[]> => {
+    try {
+      const response = await fetch('/api/search/articles', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query, limit: 3 }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Search failed');
+      }
+      
+      const data = await response.json();
+      return data.results || [];
+    } catch (error) {
+      console.error('Search error:', error);
+      return [];
+    }
+  };
+
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
 
@@ -46,20 +82,55 @@ export function ChatWidget() {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const query = inputValue;
     setInputValue('');
     setIsTyping(true);
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      // Search for relevant articles
+      const searchResults = await searchArticles(query);
+      
+      let responseContent = '';
+      let searchResultsToShow: SearchResult[] = [];
+
+      if (searchResults.length > 0) {
+        const highRelevanceResults = searchResults.filter(r => r.relevance === 'high');
+        const mediumRelevanceResults = searchResults.filter(r => r.relevance === 'medium');
+        
+        if (highRelevanceResults.length > 0) {
+          responseContent = `I found some relevant information about "${query}":\n\n`;
+          searchResultsToShow = highRelevanceResults;
+        } else if (mediumRelevanceResults.length > 0) {
+          responseContent = `Here are some related articles that might help with "${query}":\n\n`;
+          searchResultsToShow = mediumRelevanceResults;
+        } else {
+          responseContent = `I found some articles that might be related to "${query}":\n\n`;
+          searchResultsToShow = searchResults.slice(0, 2);
+        }
+      } else {
+        responseContent = `I couldn't find specific information about "${query}" in our documentation. However, I can help you in other ways:\n\n• Try rephrasing your question\n• Check our main documentation sections\n• Contact our support team for personalized help\n\nWould you like me to search for something else?`;
+      }
+
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: 'I understand you\'re asking about "' + inputValue + '". Let me search our documentation for relevant information. This is a simulated response - in the real implementation, this would search through your support articles and provide relevant answers.',
+        content: responseContent,
+        sender: 'assistant',
+        timestamp: new Date(),
+        searchResults: searchResultsToShow,
+      };
+      
+      setMessages(prev => [...prev, assistantMessage]);
+    } catch (error) {
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content: `I'm having trouble searching our documentation right now. Please try again in a moment, or contact our support team directly for immediate assistance.`,
         sender: 'assistant',
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, assistantMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -129,7 +200,49 @@ export function ChatWidget() {
                         message.sender === 'user' ? 'chat-bubble-user' : 'chat-bubble-assistant'
                       }`}
                     >
-                      {message.content}
+                      <div className="whitespace-pre-wrap">{message.content}</div>
+                      
+                      {/* Search Results */}
+                      {message.searchResults && message.searchResults.length > 0 && (
+                        <div className="mt-3 space-y-2">
+                          {message.searchResults.map((result) => (
+                            <div
+                              key={result.id}
+                              className="p-3 bg-background/50 rounded-lg border border-border/50 hover:bg-background/80 transition-colors"
+                            >
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <BookOpen className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                                    <span className="font-medium text-sm truncate">{result.title}</span>
+                                    <Badge 
+                                      variant="outline" 
+                                      className="text-xs"
+                                      style={{ 
+                                        borderColor: result.category.color,
+                                        color: result.category.color 
+                                      }}
+                                    >
+                                      {result.category.name}
+                                    </Badge>
+                                  </div>
+                                  <p className="text-xs text-muted-foreground line-clamp-2">
+                                    {result.excerpt}
+                                  </p>
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 w-6 p-0 flex-shrink-0"
+                                  onClick={() => window.open(`/docs/${result.slug}`, '_blank')}
+                                >
+                                  <ExternalLink className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}

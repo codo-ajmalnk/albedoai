@@ -8,147 +8,139 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Background & Surface Colors */
+    /* Cursor Docs Style - Light Theme */
     --background: 0 0% 100%;
-    --background-secondary: 220 13% 98%;
+    --background-secondary: 210 20% 98%;
     --surface: 0 0% 100%;
-    --surface-muted: 220 13% 97%;
+    --surface-muted: 210 20% 96%;
     
-    /* Text Colors */
-    --foreground: 220 13% 9%;
-    --foreground-muted: 220 9% 46%;
-    --foreground-subtle: 220 9% 64%;
+    /* Text Colors - Cursor Style */
+    --foreground: 222.2 84% 4.9%;
+    --foreground-muted: 215.4 16.3% 46.9%;
+    --foreground-subtle: 215.3 19.3% 34.5%;
 
-    /* Brand Colors - Professional Blue/Purple Gradient */
-    --primary: 220 100% 50%;
-    --primary-foreground: 0 0% 100%;
-    --primary-hover: 220 100% 45%;
-    --primary-subtle: 220 100% 97%;
+    /* Brand Colors - Cursor Purple/Blue */
+    --primary: 262.1 83.3% 57.8%;
+    --primary-foreground: 210 40% 98%;                                   
+    --primary-hover: 262.1 83.3% 52%;                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+    --primary-subtle: 262.1 83.3% 96%;
     
     /* Accent Colors */
-    --accent: 260 84% 60%;
-    --accent-foreground: 0 0% 100%;
-    --accent-hover: 260 84% 55%;
-    --accent-subtle: 260 84% 97%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
+    --accent-hover: 210 40% 91%;
 
     /* Semantic Colors */
-    --secondary: 220 13% 95%;
-    --secondary-foreground: 220 13% 25%;
-    --secondary-hover: 220 13% 91%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --secondary-hover: 210 40% 91%;
 
-    --muted: 220 13% 96%;
-    --muted-foreground: 220 9% 46%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
 
-    --success: 142 76% 36%;
-    --success-foreground: 0 0% 100%;
+    --success: 142.1 76.2% 36.3%;
+    --success-foreground: 210 40% 98%;
 
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
+    --warning: 32.5 94.6% 43.7%;
+    --warning-foreground: 210 40% 98%;
 
     /* Interactive Elements */
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 220 100% 50%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 262.1 83.3% 57.8%;
 
     /* Chat Widget */
     --chat-background: 0 0% 100%;
-    --chat-surface: 220 13% 98%;
-    --chat-border: 220 13% 91%;
+    --chat-surface: 210 20% 98%;
+    --chat-border: 214.3 31.8% 91.4%;
 
     /* Card & Popover */
     --card: 0 0% 100%;
-    --card-foreground: 220 13% 9%;
+    --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 220 13% 9%;
+    --popover-foreground: 222.2 84% 4.9%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Sidebar - Cursor Style */
+    --sidebar-background: 210 20% 98%;
+    --sidebar-foreground: 222.2 84% 4.9%;
+    --sidebar-primary: 262.1 83.3% 57.8%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 210 40% 96%;
+    --sidebar-accent-foreground: 222.2 84% 4.9%;
+    --sidebar-border: 214.3 31.8% 91.4%;
+    --sidebar-ring: 262.1 83.3% 57.8%;
   }
 
   .dark {
-    /* Background & Surface Colors */
-    --background: 220 13% 8%;
-    --background-secondary: 220 13% 11%;
-    --surface: 220 13% 10%;
-    --surface-muted: 220 13% 12%;
+    /* Cursor Docs Style - Dark Theme */
+    --background: 222.2 84% 4.9%;
+    --background-secondary: 217.2 32.6% 17.5%;
+    --surface: 222.2 84% 4.9%;
+    --surface-muted: 217.2 32.6% 17.5%;
     
-    /* Text Colors */
-    --foreground: 220 13% 95%;
-    --foreground-muted: 220 9% 65%;
-    --foreground-subtle: 220 9% 45%;
+    /* Text Colors - Cursor Dark Style */
+    --foreground: 210 40% 98%;
+    --foreground-muted: 215 20.2% 65.1%;
+    --foreground-subtle: 217.9 10.6% 64.9%;
 
-    /* Brand Colors - Maintain blue/purple in dark mode */
-    --primary: 220 100% 55%;
-    --primary-foreground: 220 13% 8%;
-    --primary-hover: 220 100% 60%;
-    --primary-subtle: 220 100% 12%;
+    /* Brand Colors - Cursor Purple in dark mode */
+    --primary: 263.4 70% 50.4%;
+    --primary-foreground: 210 40% 98%;
+    --primary-hover: 263.4 70% 55%;
+    --primary-subtle: 263.4 70% 10%;
     
     /* Accent Colors */
-    --accent: 260 84% 65%;
-    --accent-foreground: 220 13% 8%;
-    --accent-hover: 260 84% 70%;
-    --accent-subtle: 260 84% 12%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --accent-hover: 217.2 32.6% 20%;
 
     /* Semantic Colors */
-    --secondary: 220 13% 15%;
-    --secondary-foreground: 220 13% 85%;
-    --secondary-hover: 220 13% 18%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --secondary-hover: 217.2 32.6% 20%;
 
-    --muted: 220 13% 12%;
-    --muted-foreground: 220 9% 65%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
 
-    --destructive: 0 84% 65%;
-    --destructive-foreground: 220 13% 8%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
 
-    --success: 142 76% 45%;
-    --success-foreground: 220 13% 8%;
+    --success: 142.1 70.6% 45.3%;
+    --success-foreground: 210 40% 98%;
 
-    --warning: 38 92% 60%;
-    --warning-foreground: 220 13% 8%;
+    --warning: 32.5 94.6% 43.7%;
+    --warning-foreground: 210 40% 98%;
 
     /* Interactive Elements */
-    --border: 220 13% 18%;
-    --input: 220 13% 15%;
-    --ring: 220 100% 55%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 263.4 70% 50.4%;
 
     /* Chat Widget */
-    --chat-background: 220 13% 10%;
-    --chat-surface: 220 13% 12%;
-    --chat-border: 220 13% 18%;
+    --chat-background: 222.2 84% 4.9%;
+    --chat-surface: 217.2 32.6% 17.5%;
+    --chat-border: 217.2 32.6% 17.5%;
 
     /* Card & Popover */
-    --card: 220 13% 10%;
-    --card-foreground: 220 13% 95%;
-    --popover: 220 13% 10%;
-    --popover-foreground: 220 13% 95%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
 
-    /* Sidebar */
-    --sidebar-background: 220 13% 9%;
-    --sidebar-foreground: 220 13% 90%;
-    --sidebar-primary: 220 100% 55%;
-    --sidebar-primary-foreground: 220 13% 8%;
-    --sidebar-accent: 220 13% 12%;
-    --sidebar-accent-foreground: 220 13% 90%;
-    --sidebar-border: 220 13% 15%;
-    --sidebar-ring: 220 100% 55%;
+    /* Sidebar - Cursor Dark Style */
+    --sidebar-background: 222.2 84% 4.9%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 263.4 70% 50.4%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 217.2 32.6% 17.5%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217.2 32.6% 17.5%;
+    --sidebar-ring: 263.4 70% 50.4%;
 
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
@@ -220,5 +212,165 @@ All colors MUST be HSL.
 
   .chat-bubble-assistant {
     @apply bg-muted text-foreground mr-auto;
+  }
+
+  /* Professional Sidebar Styles */
+  .sidebar-mobile-overlay {
+    @apply fixed inset-0 bg-background/80 backdrop-blur-sm z-40 md:hidden;
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* Clean navigation item styles */
+  .nav-item-professional {
+    @apply relative rounded-md transition-all duration-150 ease-out;
+  }
+
+  .nav-item-professional:hover {
+    @apply bg-accent/50;
+  }
+
+  .nav-item-professional[data-active="true"] {
+    @apply bg-primary text-primary-foreground shadow-sm;
+  }
+
+  /* Cursor Docs Specific Styles */
+  .cursor-docs-header {
+    @apply sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60;
+  }
+
+  .cursor-docs-sidebar {
+    @apply border-r;
+    background-color: hsl(var(--sidebar-background));
+  }
+
+  .cursor-docs-content {
+    @apply flex-1 overflow-auto;
+  }
+
+  .cursor-docs-main {
+    @apply container mx-auto px-4 py-8 max-w-4xl;
+  }
+
+  .cursor-docs-nav-item {
+    @apply flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors;
+    color: hsl(var(--sidebar-foreground));
+  }
+
+  .cursor-docs-nav-item:hover {
+    background-color: hsl(var(--sidebar-accent));
+    color: hsl(var(--sidebar-accent-foreground));
+  }
+
+  .cursor-docs-nav-item[data-active="true"] {
+    background-color: hsl(var(--sidebar-primary));
+    color: hsl(var(--sidebar-primary-foreground));
+  }
+
+  .cursor-docs-search {
+    @apply relative w-full max-w-md mx-auto;
+  }
+
+  .cursor-docs-search-input {
+    @apply w-full pl-10 pr-4 py-2 border border-input rounded-md bg-background text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent;
+  }
+
+  .cursor-docs-prose {
+    @apply max-w-none;
+    color: hsl(var(--foreground));
+    line-height: 1.7;
+  }
+
+  .cursor-docs-prose h1 {
+    @apply text-3xl font-bold tracking-tight mb-4;
+    color: hsl(var(--foreground));
+  }
+
+  .cursor-docs-prose h2 {
+    @apply text-2xl font-semibold tracking-tight mt-8 mb-4 pb-2;
+    border-bottom: 1px solid hsl(var(--border));
+    color: hsl(var(--foreground));
+  }
+
+  .cursor-docs-prose h3 {
+    @apply text-xl font-semibold tracking-tight mt-6 mb-3;
+    color: hsl(var(--foreground));
+  }
+
+  .cursor-docs-prose h4 {
+    @apply text-lg font-semibold mt-4 mb-2;
+    color: hsl(var(--foreground));
+  }
+
+  .cursor-docs-prose p {
+    @apply mb-4;
+    color: hsl(var(--foreground));
+  }
+
+  .cursor-docs-prose ul, .cursor-docs-prose ol {
+    @apply mb-4 ml-6;
+  }
+
+  .cursor-docs-prose li {
+    @apply mb-2;
+    color: hsl(var(--foreground));
+  }
+
+  .cursor-docs-prose blockquote {
+    @apply border-l-4 pl-4 my-4 italic;
+    border-left-color: hsl(var(--primary));
+    color: hsl(var(--muted-foreground));
+  }
+
+  .cursor-docs-prose a {
+    @apply underline decoration-primary/50 hover:decoration-primary transition-colors;
+    color: hsl(var(--primary));
+  }
+
+  .cursor-docs-prose strong {
+    @apply font-semibold;
+    color: hsl(var(--foreground));
+  }
+
+  .cursor-docs-prose em {
+    @apply italic;
+  }
+
+  .cursor-docs-prose hr {
+    @apply my-8 border-0;
+    border-top: 1px solid hsl(var(--border));
+  }
+
+  .cursor-docs-prose code {
+    @apply px-1.5 py-0.5 rounded text-sm font-mono;
+    background-color: hsl(var(--muted));
+    color: hsl(var(--foreground));
+  }
+
+  .cursor-docs-prose pre {
+    @apply p-4 rounded-lg overflow-x-auto;
+    background-color: hsl(var(--muted));
+  }
+
+  .cursor-docs-prose pre code {
+    @apply p-0;
+    background-color: transparent;
+  }
+
+  .cursor-docs-card {
+    @apply border rounded-lg p-6 shadow-sm;
+    background-color: hsl(var(--card));
+    border-color: hsl(var(--border));
+    color: hsl(var(--card-foreground));
+  }
+
+  .cursor-docs-badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
   }
 }

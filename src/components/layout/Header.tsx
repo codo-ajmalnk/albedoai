@@ -1,45 +1,98 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { useState } from 'react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Search, MessageCircle } from 'lucide-react';
+import { Search, MessageCircle, Github, ExternalLink } from 'lucide-react';
+import { SearchModal } from '@/components/SearchModal';
+import { cn } from '@/lib/utils';
 
 export function Header() {
+  const location = useLocation();
+  const isDocsPage = location.pathname === '/' || location.pathname.startsWith('/docs');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 items-center">
-        <div className="flex items-center gap-4">
+    <header className="cursor-docs-header">
+      <div className="container flex h-16 items-center justify-between px-4">
+        {/* Left side - Logo and navigation */}
+        <div className="flex items-center gap-6">
           <SidebarTrigger className="md:hidden" />
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-md bg-gradient-primary" />
-            <span className="hidden font-bold text-lg sm:inline-block">
-              Albedo Docs
+          <Link to="/" className="flex items-center space-x-3 group">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-sm">A</span>
+            </div>
+            <span className="font-bold text-xl text-foreground group-hover:text-primary transition-colors">
+              Albedo AI
             </span>
           </Link>
+          
+          {/* Navigation for docs pages */}
+          {isDocsPage && (
+            <nav className="hidden md:flex items-center gap-1">
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/" className={cn(
+                  "text-sm font-medium px-3 py-2 rounded-md transition-colors",
+                  location.pathname === '/' ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                )}>
+                  Docs
+                </Link>
+              </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/docs/api" className={cn(
+                  "text-sm font-medium px-3 py-2 rounded-md transition-colors",
+                  location.pathname.startsWith('/docs/api') ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                )}>
+                  API
+                </Link>
+              </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/docs/examples" className={cn(
+                  "text-sm font-medium px-3 py-2 rounded-md transition-colors",
+                  location.pathname.startsWith('/docs/examples') ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                )}>
+                  Examples
+                </Link>
+              </Button>
+            </nav>
+          )}
         </div>
 
-        <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
-          <div className="w-full flex-1 md:w-auto md:flex-none">
-            <Button
-              variant="outline"
-              className="inline-flex items-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 relative w-full justify-start text-sm text-muted-foreground sm:pr-12 md:w-40 lg:w-64"
+        {/* Center - Search */}
+        <div className="flex-1 max-w-md mx-8">
+          <div className="cursor-docs-search">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <button
+              onClick={() => setIsSearchOpen(true)}
+              className="cursor-docs-search-input text-left cursor-pointer"
             >
-              <Search className="mr-2 h-4 w-4" />
-              <span className="hidden lg:inline-flex">Search documentation...</span>
-              <span className="inline-flex lg:hidden">Search...</span>
-            </Button>
+              Search documentation...
+            </button>
           </div>
-          <nav className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/support">
-                <MessageCircle className="h-4 w-4" />
-                <span className="hidden sm:inline-block ml-2">Support</span>
-              </Link>
-            </Button>
-            <ThemeToggle />
-          </nav>
+        </div>
+
+        {/* Right side - Actions */}
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="sm" asChild>
+            <Link to="/support" className="flex items-center gap-2 text-sm">
+              <MessageCircle className="h-4 w-4" />
+              <span className="hidden sm:inline">Support</span>
+            </Link>
+          </Button>
+          
+          <Button variant="ghost" size="sm" asChild>
+            <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm">
+              <Github className="h-4 w-4" />
+              <span className="hidden sm:inline">GitHub</span>
+            </a>
+          </Button>
+          
+          <ThemeToggle />
         </div>
       </div>
+
+      {/* Search Modal */}
+      <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </header>
   );
 }

@@ -1,13 +1,28 @@
-import { useState } from 'react';
-import { Send, MessageCircle, Clock, CheckCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Send, MessageCircle, Clock, CheckCircle, ExternalLink, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 
-const categories = [
+interface Category {
+  id: string;
+  name: string;
+  color: string;
+}
+
+interface Article {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  category: Category;
+}
+
+const defaultCategories = [
   { value: 'general', label: 'General Question' },
   { value: 'technical', label: 'Technical Issue' },
   { value: 'billing', label: 'Billing Support' },
@@ -18,26 +33,101 @@ const categories = [
 export default function Support() {
   const [formData, setFormData] = useState({
     email: '',
+    name: '',
     category: '',
     subject: '',
     message: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [submittedToken, setSubmittedToken] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Load categories on component mount
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const response = await fetch('/api/categories');
+        if (response.ok) {
+          const data = await response.json();
+          setCategories(data.categories || []);
+        }
+      } catch (error) {
+        console.error('Failed to load categories:', error);
+      }
+    };
+    loadCategories();
+  }, []);
+
+  // Search articles
+  const searchArticles = async (query: string) => {
+    if (!query.trim()) {
+      setArticles([]);
+      setShowSearchResults(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/search/articles', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query, limit: 5 }),
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setArticles(data.results || []);
+        setShowSearchResults(true);
+      }
+    } catch (error) {
+      console.error('Search failed:', error);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission
-    setTimeout(() => {
-      toast({
-        title: 'Support request submitted',
-        description: 'We\'ll get back to you within 24 hours.',
+    try {
+      const response = await fetch('/api/feedback/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          name: formData.name,
+          subject: formData.subject,
+          message: formData.message,
+          categoryId: formData.category,
+        }),
       });
-      setFormData({ email: '', category: '', subject: '', message: '' });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSubmittedToken(data.feedback.token);
+        toast({
+          title: 'Support request submitted',
+          description: 'We\'ll get back to you within 24 hours. Check your email for confirmation.',
+        });
+        setFormData({ email: '', name: '', category: '', subject: '', message: '' });
+      } else {
+        throw new Error('Submission failed');
+      }
+    } catch (error) {
+      toast({
+        title: 'Submission failed',
+        description: 'Please try again or contact us directly.',
+        variant: 'destructive',
+      });
+    } finally {
       setIsSubmitting(false);
-    }, 2000);
+    }
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -53,6 +143,76 @@ export default function Support() {
           Need help? We're here to assist you. Submit a support request and our team will get back to you quickly.
         </p>
       </div>
+
+      {/* Search Articles Section */}
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Search className="h-5 w-5" />
+            Search Documentation
+          </CardTitle>
+          <CardDescription>
+            Before submitting a support request, try searching our documentation for existing solutions.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search for help articles..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  searchArticles(e.target.value);
+                }}
+                className="pl-10"
+              />
+            </div>
+            
+            {showSearchResults && (
+              <div className="space-y-2">
+                {articles.length > 0 ? (
+                  <>
+                    <p className="text-sm text-muted-foreground">Found {articles.length} related articles:</p>
+                    {articles.map((article) => (
+                      <div
+                        key={article.id}
+                        className="p-3 border rounded-lg hover:bg-secondary/50 transition-colors cursor-pointer"
+                        onClick={() => window.open(`/docs/${article.slug}`, '_blank')}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-medium text-sm">{article.title}</span>
+                              <Badge 
+                                variant="outline" 
+                                className="text-xs"
+                                style={{ 
+                                  borderColor: article.category.color,
+                                  color: article.category.color 
+                                }}
+                              >
+                                {article.category.name}
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground line-clamp-2">
+                              {article.excerpt}
+                            </p>
+                          </div>
+                          <ExternalLink className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        </div>
+                      </div>
+                    ))}
+                  </>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No articles found. Try a different search term.</p>
+                )}
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Support Form */}
@@ -81,22 +241,42 @@ export default function Support() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label htmlFor="category" className="text-sm font-medium">
-                      Category *
+                    <label htmlFor="name" className="text-sm font-medium">
+                      Name (Optional)
                     </label>
-                    <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories.map((category) => (
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => handleInputChange('name', e.target.value)}
+                      placeholder="Your name"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="category" className="text-sm font-medium">
+                    Category *
+                  </label>
+                  <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.length > 0 ? (
+                        categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.name}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        defaultCategories.map((category) => (
                           <SelectItem key={category.value} value={category.value}>
                             {category.label}
                           </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
@@ -230,6 +410,61 @@ export default function Support() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Feedback Tracking Section */}
+        {submittedToken && (
+          <div className="lg:col-span-2">
+            <Card className="border-success">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-success">
+                  <CheckCircle className="h-5 w-5" />
+                  Request Submitted Successfully
+                </CardTitle>
+                <CardDescription>
+                  Your support request has been received. You can track its status using the link below.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    We've sent a confirmation email to <strong>{formData.email}</strong> with your tracking information.
+                  </p>
+                  <div className="p-4 bg-secondary rounded-lg">
+                    <p className="text-sm font-medium mb-2">Track your request:</p>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        value={`${window.location.origin}/support/track/${submittedToken}`}
+                        readOnly
+                        className="font-mono text-xs"
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          navigator.clipboard.writeText(`${window.location.origin}/support/track/${submittedToken}`);
+                          toast({
+                            title: 'Link copied',
+                            description: 'Tracking link copied to clipboard.',
+                          });
+                        }}
+                      >
+                        Copy
+                      </Button>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={() => window.open(`/support/track/${submittedToken}`, '_blank')}
+                    className="w-full"
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Open Tracking Page
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     </div>
   );
