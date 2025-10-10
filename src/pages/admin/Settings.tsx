@@ -1,24 +1,48 @@
-import { useState } from 'react';
-import { Save, Settings as SettingsIcon, Shield, Mail, Bell, Database, Globe, Key, Users, Zap } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
+import { useState } from "react";
+import {
+  Save,
+  Settings as SettingsIcon,
+  Shield,
+  Mail,
+  Bell,
+  Database,
+  Globe,
+  Key,
+  Users,
+  Zap,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 
 export default function Settings() {
   const [generalSettings, setGeneralSettings] = useState({
-    siteName: 'Albedo AI Documentation',
-    siteDescription: 'Comprehensive documentation and support for Albedo AI platform',
-    siteUrl: 'https://docs.albedoai.com',
-    adminEmail: 'admin@albedoai.com',
-    timezone: 'UTC',
-    language: 'en',
+    siteName: "Albedo AI Documentation",
+    siteDescription:
+      "Comprehensive documentation and support for Albedo AI platform",
+    siteUrl: "https://docs.albedoai.com",
+    adminEmail: "admin@albedoai.com",
+    timezone: "UTC",
+    language: "en",
   });
 
   const [securitySettings, setSecuritySettings] = useState({
@@ -40,23 +64,23 @@ export default function Settings() {
   });
 
   const [apiSettings, setApiSettings] = useState({
-    apiVersion: 'v1',
+    apiVersion: "v1",
     rateLimitPerMinute: 100,
     enableCors: true,
-    corsOrigins: 'https://albedoai.com,https://app.albedoai.com',
+    corsOrigins: "https://albedoai.com,https://app.albedoai.com",
     enableWebhooks: true,
-    webhookSecret: 'whsec_1234567890abcdef',
+    webhookSecret: "whsec_1234567890abcdef",
   });
 
   const handleSave = () => {
     // Simulate save operation
-    console.log('Saving settings...');
+    console.log("Saving settings...");
   };
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      {/* Header - Add padding-top on mobile to avoid sidebar button overlap */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-12 lg:pt-0">
         <div>
           <h1 className="text-3xl font-bold">System Settings</h1>
           <p className="text-muted-foreground">
@@ -70,22 +94,34 @@ export default function Settings() {
       </div>
 
       <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4">
-          <TabsTrigger value="general" className="flex items-center gap-2">
-            <SettingsIcon className="h-4 w-4" />
-            <span className="hidden sm:inline">General</span>
+        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 h-auto p-1 gap-1">
+          <TabsTrigger
+            value="general"
+            className="flex items-center justify-center gap-2 py-2.5"
+          >
+            <SettingsIcon className="h-4 w-4 flex-shrink-0" />
+            <span className="hidden sm:inline truncate">General</span>
           </TabsTrigger>
-          <TabsTrigger value="security" className="flex items-center gap-2">
-            <Shield className="h-4 w-4" />
-            <span className="hidden sm:inline">Security</span>
+          <TabsTrigger
+            value="security"
+            className="flex items-center justify-center gap-2 py-2.5"
+          >
+            <Shield className="h-4 w-4 flex-shrink-0" />
+            <span className="hidden sm:inline truncate">Security</span>
           </TabsTrigger>
-          <TabsTrigger value="notifications" className="flex items-center gap-2">
-            <Bell className="h-4 w-4" />
-            <span className="hidden sm:inline">Notifications</span>
+          <TabsTrigger
+            value="notifications"
+            className="flex items-center justify-center gap-2 py-2.5"
+          >
+            <Bell className="h-4 w-4 flex-shrink-0" />
+            <span className="hidden sm:inline truncate">Notifications</span>
           </TabsTrigger>
-          <TabsTrigger value="api" className="flex items-center gap-2">
-            <Key className="h-4 w-4" />
-            <span className="hidden sm:inline">API</span>
+          <TabsTrigger
+            value="api"
+            className="flex items-center justify-center gap-2 py-2.5"
+          >
+            <Key className="h-4 w-4 flex-shrink-0" />
+            <span className="hidden sm:inline truncate">API</span>
           </TabsTrigger>
         </TabsList>
 
@@ -108,7 +144,12 @@ export default function Settings() {
                   <Input
                     id="siteName"
                     value={generalSettings.siteName}
-                    onChange={(e) => setGeneralSettings({...generalSettings, siteName: e.target.value})}
+                    onChange={(e) =>
+                      setGeneralSettings({
+                        ...generalSettings,
+                        siteName: e.target.value,
+                      })
+                    }
                   />
                 </div>
                 <div className="space-y-2">
@@ -116,17 +157,27 @@ export default function Settings() {
                   <Input
                     id="siteUrl"
                     value={generalSettings.siteUrl}
-                    onChange={(e) => setGeneralSettings({...generalSettings, siteUrl: e.target.value})}
+                    onChange={(e) =>
+                      setGeneralSettings({
+                        ...generalSettings,
+                        siteUrl: e.target.value,
+                      })
+                    }
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="siteDescription">Site Description</Label>
                 <Textarea
                   id="siteDescription"
                   value={generalSettings.siteDescription}
-                  onChange={(e) => setGeneralSettings({...generalSettings, siteDescription: e.target.value})}
+                  onChange={(e) =>
+                    setGeneralSettings({
+                      ...generalSettings,
+                      siteDescription: e.target.value,
+                    })
+                  }
                   rows={3}
                 />
               </div>
@@ -138,21 +189,42 @@ export default function Settings() {
                     id="adminEmail"
                     type="email"
                     value={generalSettings.adminEmail}
-                    onChange={(e) => setGeneralSettings({...generalSettings, adminEmail: e.target.value})}
+                    onChange={(e) =>
+                      setGeneralSettings({
+                        ...generalSettings,
+                        adminEmail: e.target.value,
+                      })
+                    }
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="timezone">Timezone</Label>
-                  <Select value={generalSettings.timezone} onValueChange={(value) => setGeneralSettings({...generalSettings, timezone: value})}>
+                  <Select
+                    value={generalSettings.timezone}
+                    onValueChange={(value) =>
+                      setGeneralSettings({
+                        ...generalSettings,
+                        timezone: value,
+                      })
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="UTC">UTC</SelectItem>
-                      <SelectItem value="America/New_York">Eastern Time</SelectItem>
-                      <SelectItem value="America/Chicago">Central Time</SelectItem>
-                      <SelectItem value="America/Denver">Mountain Time</SelectItem>
-                      <SelectItem value="America/Los_Angeles">Pacific Time</SelectItem>
+                      <SelectItem value="America/New_York">
+                        Eastern Time
+                      </SelectItem>
+                      <SelectItem value="America/Chicago">
+                        Central Time
+                      </SelectItem>
+                      <SelectItem value="America/Denver">
+                        Mountain Time
+                      </SelectItem>
+                      <SelectItem value="America/Los_Angeles">
+                        Pacific Time
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -184,7 +256,12 @@ export default function Settings() {
                   </div>
                   <Switch
                     checked={securitySettings.requireEmailVerification}
-                    onCheckedChange={(checked) => setSecuritySettings({...securitySettings, requireEmailVerification: checked})}
+                    onCheckedChange={(checked) =>
+                      setSecuritySettings({
+                        ...securitySettings,
+                        requireEmailVerification: checked,
+                      })
+                    }
                   />
                 </div>
 
@@ -199,7 +276,12 @@ export default function Settings() {
                   </div>
                   <Switch
                     checked={securitySettings.allowRegistration}
-                    onCheckedChange={(checked) => setSecuritySettings({...securitySettings, allowRegistration: checked})}
+                    onCheckedChange={(checked) =>
+                      setSecuritySettings({
+                        ...securitySettings,
+                        allowRegistration: checked,
+                      })
+                    }
                   />
                 </div>
 
@@ -214,19 +296,31 @@ export default function Settings() {
                   </div>
                   <Switch
                     checked={securitySettings.enableTwoFactor}
-                    onCheckedChange={(checked) => setSecuritySettings({...securitySettings, enableTwoFactor: checked})}
+                    onCheckedChange={(checked) =>
+                      setSecuritySettings({
+                        ...securitySettings,
+                        enableTwoFactor: checked,
+                      })
+                    }
                   />
                 </div>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="sessionTimeout">Session Timeout (minutes)</Label>
+                  <Label htmlFor="sessionTimeout">
+                    Session Timeout (minutes)
+                  </Label>
                   <Input
                     id="sessionTimeout"
                     type="number"
                     value={securitySettings.sessionTimeout}
-                    onChange={(e) => setSecuritySettings({...securitySettings, sessionTimeout: parseInt(e.target.value)})}
+                    onChange={(e) =>
+                      setSecuritySettings({
+                        ...securitySettings,
+                        sessionTimeout: parseInt(e.target.value),
+                      })
+                    }
                   />
                 </div>
                 <div className="space-y-2">
@@ -235,18 +329,30 @@ export default function Settings() {
                     id="maxLoginAttempts"
                     type="number"
                     value={securitySettings.maxLoginAttempts}
-                    onChange={(e) => setSecuritySettings({...securitySettings, maxLoginAttempts: parseInt(e.target.value)})}
+                    onChange={(e) =>
+                      setSecuritySettings({
+                        ...securitySettings,
+                        maxLoginAttempts: parseInt(e.target.value),
+                      })
+                    }
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="passwordMinLength">Minimum Password Length</Label>
+                <Label htmlFor="passwordMinLength">
+                  Minimum Password Length
+                </Label>
                 <Input
                   id="passwordMinLength"
                   type="number"
                   value={securitySettings.passwordMinLength}
-                  onChange={(e) => setSecuritySettings({...securitySettings, passwordMinLength: parseInt(e.target.value)})}
+                  onChange={(e) =>
+                    setSecuritySettings({
+                      ...securitySettings,
+                      passwordMinLength: parseInt(e.target.value),
+                    })
+                  }
                 />
               </div>
             </CardContent>
@@ -276,7 +382,12 @@ export default function Settings() {
                   </div>
                   <Switch
                     checked={notificationSettings.emailNotifications}
-                    onCheckedChange={(checked) => setNotificationSettings({...notificationSettings, emailNotifications: checked})}
+                    onCheckedChange={(checked) =>
+                      setNotificationSettings({
+                        ...notificationSettings,
+                        emailNotifications: checked,
+                      })
+                    }
                   />
                 </div>
 
@@ -291,7 +402,12 @@ export default function Settings() {
                   </div>
                   <Switch
                     checked={notificationSettings.slackNotifications}
-                    onCheckedChange={(checked) => setNotificationSettings({...notificationSettings, slackNotifications: checked})}
+                    onCheckedChange={(checked) =>
+                      setNotificationSettings({
+                        ...notificationSettings,
+                        slackNotifications: checked,
+                      })
+                    }
                   />
                 </div>
 
@@ -306,7 +422,12 @@ export default function Settings() {
                   </div>
                   <Switch
                     checked={notificationSettings.webhookNotifications}
-                    onCheckedChange={(checked) => setNotificationSettings({...notificationSettings, webhookNotifications: checked})}
+                    onCheckedChange={(checked) =>
+                      setNotificationSettings({
+                        ...notificationSettings,
+                        webhookNotifications: checked,
+                      })
+                    }
                   />
                 </div>
 
@@ -321,7 +442,12 @@ export default function Settings() {
                   </div>
                   <Switch
                     checked={notificationSettings.newUserNotifications}
-                    onCheckedChange={(checked) => setNotificationSettings({...notificationSettings, newUserNotifications: checked})}
+                    onCheckedChange={(checked) =>
+                      setNotificationSettings({
+                        ...notificationSettings,
+                        newUserNotifications: checked,
+                      })
+                    }
                   />
                 </div>
 
@@ -336,7 +462,12 @@ export default function Settings() {
                   </div>
                   <Switch
                     checked={notificationSettings.feedbackNotifications}
-                    onCheckedChange={(checked) => setNotificationSettings({...notificationSettings, feedbackNotifications: checked})}
+                    onCheckedChange={(checked) =>
+                      setNotificationSettings({
+                        ...notificationSettings,
+                        feedbackNotifications: checked,
+                      })
+                    }
                   />
                 </div>
 
@@ -351,7 +482,12 @@ export default function Settings() {
                   </div>
                   <Switch
                     checked={notificationSettings.systemAlerts}
-                    onCheckedChange={(checked) => setNotificationSettings({...notificationSettings, systemAlerts: checked})}
+                    onCheckedChange={(checked) =>
+                      setNotificationSettings({
+                        ...notificationSettings,
+                        systemAlerts: checked,
+                      })
+                    }
                   />
                 </div>
               </div>
@@ -375,7 +511,12 @@ export default function Settings() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="apiVersion">API Version</Label>
-                  <Select value={apiSettings.apiVersion} onValueChange={(value) => setApiSettings({...apiSettings, apiVersion: value})}>
+                  <Select
+                    value={apiSettings.apiVersion}
+                    onValueChange={(value) =>
+                      setApiSettings({ ...apiSettings, apiVersion: value })
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -391,7 +532,12 @@ export default function Settings() {
                     id="rateLimit"
                     type="number"
                     value={apiSettings.rateLimitPerMinute}
-                    onChange={(e) => setApiSettings({...apiSettings, rateLimitPerMinute: parseInt(e.target.value)})}
+                    onChange={(e) =>
+                      setApiSettings({
+                        ...apiSettings,
+                        rateLimitPerMinute: parseInt(e.target.value),
+                      })
+                    }
                   />
                 </div>
               </div>
@@ -405,7 +551,9 @@ export default function Settings() {
                 </div>
                 <Switch
                   checked={apiSettings.enableCors}
-                  onCheckedChange={(checked) => setApiSettings({...apiSettings, enableCors: checked})}
+                  onCheckedChange={(checked) =>
+                    setApiSettings({ ...apiSettings, enableCors: checked })
+                  }
                 />
               </div>
 
@@ -414,7 +562,12 @@ export default function Settings() {
                 <Textarea
                   id="corsOrigins"
                   value={apiSettings.corsOrigins}
-                  onChange={(e) => setApiSettings({...apiSettings, corsOrigins: e.target.value})}
+                  onChange={(e) =>
+                    setApiSettings({
+                      ...apiSettings,
+                      corsOrigins: e.target.value,
+                    })
+                  }
                   placeholder="https://example.com,https://app.example.com"
                   rows={2}
                 />
@@ -429,7 +582,9 @@ export default function Settings() {
                 </div>
                 <Switch
                   checked={apiSettings.enableWebhooks}
-                  onCheckedChange={(checked) => setApiSettings({...apiSettings, enableWebhooks: checked})}
+                  onCheckedChange={(checked) =>
+                    setApiSettings({ ...apiSettings, enableWebhooks: checked })
+                  }
                 />
               </div>
 
@@ -440,7 +595,12 @@ export default function Settings() {
                     id="webhookSecret"
                     type="password"
                     value={apiSettings.webhookSecret}
-                    onChange={(e) => setApiSettings({...apiSettings, webhookSecret: e.target.value})}
+                    onChange={(e) =>
+                      setApiSettings({
+                        ...apiSettings,
+                        webhookSecret: e.target.value,
+                      })
+                    }
                   />
                   <Button variant="outline" size="sm">
                     Generate

@@ -1,82 +1,120 @@
-import { useState, useEffect } from 'react';
-import { Search, Filter, MoreHorizontal, UserPlus, Mail, Phone, Calendar, Shield, CheckCircle, XCircle, Clock } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { TableSkeleton, CardSkeleton } from '@/components/SkeletonLoader';
+import { useState, useEffect } from "react";
+import {
+  Search,
+  Filter,
+  MoreHorizontal,
+  UserPlus,
+  Mail,
+  Phone,
+  Calendar,
+  Shield,
+  CheckCircle,
+  XCircle,
+  Clock,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { TableSkeleton, CardSkeleton } from "@/components/SkeletonLoader";
 
 const mockUsers = [
   {
     id: 1,
-    name: 'John Doe',
-    email: 'john@example.com',
-    role: 'admin',
-    status: 'active',
-    lastActive: '2 hours ago',
-    joinDate: '2024-01-15',
-    phone: '+1 (555) 123-4567',
+    name: "John Doe",
+    email: "john@example.com",
+    role: "admin",
+    status: "active",
+    lastActive: "2 hours ago",
+    joinDate: "2024-01-15",
+    phone: "+1 (555) 123-4567",
     avatar: null,
   },
   {
     id: 2,
-    name: 'Sarah Wilson',
-    email: 'sarah@example.com',
-    role: 'moderator',
-    status: 'active',
-    lastActive: '1 day ago',
-    joinDate: '2024-02-20',
-    phone: '+1 (555) 234-5678',
+    name: "Sarah Wilson",
+    email: "sarah@example.com",
+    role: "moderator",
+    status: "active",
+    lastActive: "1 day ago",
+    joinDate: "2024-02-20",
+    phone: "+1 (555) 234-5678",
     avatar: null,
   },
   {
     id: 3,
-    name: 'Mike Johnson',
-    email: 'mike@example.com',
-    role: 'user',
-    status: 'inactive',
-    lastActive: '1 week ago',
-    joinDate: '2024-01-10',
-    phone: '+1 (555) 345-6789',
+    name: "Mike Johnson",
+    email: "mike@example.com",
+    role: "user",
+    status: "inactive",
+    lastActive: "1 week ago",
+    joinDate: "2024-01-10",
+    phone: "+1 (555) 345-6789",
     avatar: null,
   },
   {
     id: 4,
-    name: 'Emily Davis',
-    email: 'emily@example.com',
-    role: 'user',
-    status: 'pending',
-    lastActive: 'Never',
-    joinDate: '2024-03-01',
-    phone: '+1 (555) 456-7890',
+    name: "Emily Davis",
+    email: "emily@example.com",
+    role: "user",
+    status: "pending",
+    lastActive: "Never",
+    joinDate: "2024-03-01",
+    phone: "+1 (555) 456-7890",
     avatar: null,
   },
   {
     id: 5,
-    name: 'Alex Brown',
-    email: 'alex@example.com',
-    role: 'moderator',
-    status: 'active',
-    lastActive: '3 hours ago',
-    joinDate: '2024-02-05',
-    phone: '+1 (555) 567-8901',
+    name: "Alex Brown",
+    email: "alex@example.com",
+    role: "moderator",
+    status: "active",
+    lastActive: "3 hours ago",
+    joinDate: "2024-02-05",
+    phone: "+1 (555) 567-8901",
     avatar: null,
   },
 ];
 
 const roleColors = {
-  admin: 'bg-red-100 text-red-800',
-  moderator: 'bg-blue-100 text-blue-800',
-  user: 'bg-green-100 text-green-800',
+  admin: "bg-red-100 text-red-800",
+  moderator: "bg-blue-100 text-blue-800",
+  user: "bg-green-100 text-green-800",
 };
 
 const statusColors = {
-  active: 'bg-green-100 text-green-800',
-  inactive: 'bg-gray-100 text-gray-800',
-  pending: 'bg-yellow-100 text-yellow-800',
+  active: "bg-green-100 text-green-800",
+  inactive: "bg-gray-100 text-gray-800",
+  pending: "bg-yellow-100 text-yellow-800",
 };
 
 const statusIcons = {
@@ -87,9 +125,9 @@ const statusIcons = {
 
 export default function Users() {
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [roleFilter, setRoleFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   useEffect(() => {
     // Simulate loading
@@ -97,12 +135,14 @@ export default function Users() {
     return () => clearTimeout(timer);
   }, []);
 
-  const filteredUsers = mockUsers.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesRole = roleFilter === 'all' || user.role === roleFilter;
-    const matchesStatus = statusFilter === 'all' || user.status === statusFilter;
-    
+  const filteredUsers = mockUsers.filter((user) => {
+    const matchesSearch =
+      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesRole = roleFilter === "all" || user.role === roleFilter;
+    const matchesStatus =
+      statusFilter === "all" || user.status === statusFilter;
+
     return matchesSearch && matchesRole && matchesStatus;
   });
 
@@ -113,8 +153,8 @@ export default function Users() {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      {/* Header - Add padding-top on mobile to avoid sidebar button overlap */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-12 lg:pt-0">
         <div>
           <h1 className="text-3xl font-bold">User Management</h1>
           <p className="text-muted-foreground">
@@ -139,7 +179,9 @@ export default function Users() {
           <>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Total Users
+                </CardTitle>
                 <Shield className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -152,15 +194,22 @@ export default function Users() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Users</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Active Users
+                </CardTitle>
                 <CheckCircle className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {mockUsers.filter(u => u.status === 'active').length}
+                  {mockUsers.filter((u) => u.status === "active").length}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {Math.round((mockUsers.filter(u => u.status === 'active').length / mockUsers.length) * 100)}% of total
+                  {Math.round(
+                    (mockUsers.filter((u) => u.status === "active").length /
+                      mockUsers.length) *
+                      100
+                  )}
+                  % of total
                 </p>
               </CardContent>
             </Card>
@@ -172,7 +221,7 @@ export default function Users() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {mockUsers.filter(u => u.role === 'admin').length}
+                  {mockUsers.filter((u) => u.role === "admin").length}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   System administrators
@@ -187,7 +236,7 @@ export default function Users() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {mockUsers.filter(u => u.status === 'pending').length}
+                  {mockUsers.filter((u) => u.status === "pending").length}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   Awaiting approval
@@ -202,9 +251,7 @@ export default function Users() {
       <Card>
         <CardHeader>
           <CardTitle>Users</CardTitle>
-          <CardDescription>
-            Manage and monitor user accounts
-          </CardDescription>
+          <CardDescription>Manage and monitor user accounts</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -263,24 +310,39 @@ export default function Users() {
                         <div className="flex items-center space-x-3">
                           <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                             <span className="text-sm font-medium">
-                              {user.name.split(' ').map(n => n[0]).join('')}
+                              {user.name
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")}
                             </span>
                           </div>
                           <div>
                             <div className="font-medium">{user.name}</div>
-                            <div className="text-sm text-muted-foreground">{user.email}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {user.email}
+                            </div>
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge className={roleColors[user.role as keyof typeof roleColors]}>
+                        <Badge
+                          className={
+                            roleColors[user.role as keyof typeof roleColors]
+                          }
+                        >
                           {user.role}
                         </Badge>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">
                           {getStatusIcon(user.status)}
-                          <Badge className={statusColors[user.status as keyof typeof statusColors]}>
+                          <Badge
+                            className={
+                              statusColors[
+                                user.status as keyof typeof statusColors
+                              ]
+                            }
+                          >
                             {user.status}
                           </Badge>
                         </div>

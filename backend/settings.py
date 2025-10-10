@@ -12,6 +12,12 @@ class Settings(BaseSettings):
     cors_origins: List[str] = [
         os.getenv("CORS_ORIGIN", "http://localhost:8080"),
         os.getenv("CORS_ORIGIN_ALT", "http://127.0.0.1:8080"),
+        "http://localhost:5173",  # Vite default
+        "http://127.0.0.1:5173",
+        "http://192.168.1.5:5173",  # Mobile access - Vite
+        "http://192.168.1.5:8080",
+        "http://192.168.1.5:8081",
+        "*"
     ]
 
 

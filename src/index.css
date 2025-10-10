@@ -22,7 +22,7 @@ All colors MUST be HSL.
     --background-secondary: 210 20% 98%;
     --surface: 0 0% 100%;
     --surface-muted: 210 20% 96%;
-    
+
     /* Text Colors - Cursor Style */
     --foreground: 222.2 84% 4.9%;
     --foreground-muted: 215.4 16.3% 46.9%;
@@ -30,10 +30,10 @@ All colors MUST be HSL.
 
     /* Brand Colors - Cursor Purple/Blue */
     --primary: 262.1 83.3% 57.8%;
-    --primary-foreground: 210 40% 98%;                                   
-    --primary-hover: 262.1 83.3% 52%;                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+    --primary-foreground: 210 40% 98%;
+    --primary-hover: 262.1 83.3% 52%;
     --primary-subtle: 262.1 83.3% 96%;
-    
+
     /* Accent Colors */
     --accent: 210 40% 96%;
     --accent-foreground: 222.2 84% 4.9%;
@@ -91,7 +91,7 @@ All colors MUST be HSL.
     --background-secondary: 217.2 32.6% 17.5%;
     --surface: 222.2 84% 4.9%;
     --surface-muted: 217.2 32.6% 17.5%;
-    
+
     /* Text Colors - Cursor Dark Style */
     --foreground: 210 40% 98%;
     --foreground-muted: 215 20.2% 65.1%;
@@ -102,7 +102,7 @@ All colors MUST be HSL.
     --primary-foreground: 210 40% 98%;
     --primary-hover: 263.4 70% 55%;
     --primary-subtle: 263.4 70% 10%;
-    
+
     /* Accent Colors */
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
@@ -152,9 +152,21 @@ All colors MUST be HSL.
     --sidebar-ring: 263.4 70% 50.4%;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
-    --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(var(--surface-muted)));
-    --gradient-hero: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
+    --gradient-primary: linear-gradient(
+      135deg,
+      hsl(var(--primary)),
+      hsl(var(--accent))
+    );
+    --gradient-subtle: linear-gradient(
+      180deg,
+      hsl(var(--background)),
+      hsl(var(--surface-muted))
+    );
+    --gradient-hero: linear-gradient(
+      135deg,
+      hsl(var(--primary)) 0%,
+      hsl(var(--accent)) 100%
+    );
 
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 hsl(var(--foreground) / 0.05);
@@ -225,26 +237,37 @@ All colors MUST be HSL.
 
   /* Professional Sidebar Styles */
   .sidebar-mobile-overlay {
-    @apply fixed inset-0 bg-background/80 backdrop-blur-sm z-40 md:hidden;
+    @apply fixed inset-0 bg-background/80 backdrop-blur-sm z-40 lg:hidden;
     animation: fadeIn 0.2s ease-out;
   }
 
   /* Responsive sidebar adjustments */
-  @media (max-width: 768px) {
+  @media (max-width: 1023px) {
     .cursor-docs-sidebar {
       @apply w-full max-w-sm;
     }
   }
 
-  @media (min-width: 769px) and (max-width: 1024px) {
-    .cursor-docs-sidebar {
-      @apply w-64;
+  /* Force desktop sidebar to be visible on large screens */
+  @media (min-width: 1024px) {
+    /* Hide mobile sheet on desktop */
+    [data-sidebar="sidebar"][data-mobile="true"] {
+      display: none !important;
+    }
+
+    /* Ensure desktop sidebar wrapper is visible */
+    .group.peer[class*="sidebar"] {
+      display: block !important;
     }
   }
 
   @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 
   /* Clean navigation item styles */
@@ -339,7 +362,8 @@ All colors MUST be HSL.
     color: hsl(var(--foreground));
   }
 
-  .cursor-docs-prose ul, .cursor-docs-prose ol {
+  .cursor-docs-prose ul,
+  .cursor-docs-prose ol {
     @apply mb-4 ml-6;
   }
 
@@ -408,13 +432,18 @@ All colors MUST be HSL.
   }
 
   .cursor-docs-nav-button::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, hsl(var(--accent)), transparent);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(var(--accent)),
+      transparent
+    );
     transition: left 0.5s;
   }
 
@@ -433,10 +462,12 @@ All colors MUST be HSL.
   }
 
   .cursor-docs-shadow-md {
-    box-shadow: 0 4px 6px -1px hsl(var(--foreground) / 0.1), 0 2px 4px -1px hsl(var(--foreground) / 0.06);
+    box-shadow: 0 4px 6px -1px hsl(var(--foreground) / 0.1),
+      0 2px 4px -1px hsl(var(--foreground) / 0.06);
   }
 
   .cursor-docs-shadow-lg {
-    box-shadow: 0 10px 15px -3px hsl(var(--foreground) / 0.1), 0 4px 6px -2px hsl(var(--foreground) / 0.05);
+    box-shadow: 0 10px 15px -3px hsl(var(--foreground) / 0.1),
+      0 4px 6px -2px hsl(var(--foreground) / 0.05);
   }
 }
