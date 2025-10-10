@@ -50,3 +50,27 @@ class Article(Base):
     category_id: Mapped[int] = mapped_column(
         ForeignKey("categories.id"), nullable=False)
     category = relationship("Category", back_populates="articles")
+
+
+class Feedback(Base):
+    __tablename__ = "feedback"
+
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, autoincrement=True)
+    email: Mapped[str] = mapped_column(String(255), nullable=False)
+    name: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    subject: Mapped[str] = mapped_column(String(512), nullable=False)
+    message: Mapped[str] = mapped_column(Text, nullable=False)
+    category_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("categories.id"), nullable=True)
+    token: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    status: Mapped[str] = mapped_column(
+        # pending, in_progress, resolved, closed
+        String(50), default="pending", nullable=False)
+    admin_response: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    category = relationship("Category")

@@ -119,3 +119,37 @@ class ArticleResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# Feedback-related schemas
+class FeedbackCreate(BaseModel):
+    """Schema for creating feedback/support request."""
+    email: str
+    name: Optional[str] = None
+    subject: str
+    message: str
+    categoryId: Optional[str] = None
+
+
+class FeedbackResponse(BaseModel):
+    """Schema for feedback responses."""
+    id: int
+    email: str
+    name: Optional[str] = None
+    subject: str
+    message: str
+    category_id: Optional[int] = None
+    token: str
+    status: str
+    admin_response: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class FeedbackUpdate(BaseModel):
+    """Schema for updating feedback."""
+    status: Optional[str] = None
+    admin_response: Optional[str] = None
