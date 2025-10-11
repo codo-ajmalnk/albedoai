@@ -13,6 +13,7 @@ import { PerformanceMonitor } from "@/components/PerformanceMonitor";
 // Pages
 import DocsIndex from "./pages/DocsIndex";
 import Installation from "./pages/docs/Installation";
+import ArticleView from "./pages/ArticleView";
 import Support from "./pages/Support";
 import FeedbackTrack from "./pages/FeedbackTrack";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -39,20 +40,24 @@ const App = () => (
             <div className="min-h-screen flex w-full bg-background">
               <AppSidebar />
               <div className="flex-1 flex flex-col cursor-docs-content">
-                  {/* Mobile/Tablet sidebar trigger */}
-                  <div className="md:hidden fixed top-4 left-4 z-50">
-                    <SidebarTrigger aria-label="Open navigation" />
-                  </div>
+                {/* Mobile/Tablet sidebar trigger - positioned on the right, hidden on desktop */}
+                <div className="fixed top-4 right-4 z-50 lg:hidden">
+                  <SidebarTrigger aria-label="Toggle navigation" />
+                </div>
                 <main className="cursor-docs-main">
                   <Routes>
                     <Route path="/" element={<DocsIndex />} />
                     <Route path="/docs" element={<DocsIndex />} />
-                    <Route path="/docs/installation" element={<Installation />} />
-                    <Route path="/docs/getting-started" element={<GettingStarted />} />
-                    <Route path="/docs/faq" element={<FAQ />} />
+                    
+                    
+                    {/* Dynamic article route - must come after specific routes */}
+                    <Route path="/docs/:slug" element={<ArticleView />} />
                     {/* removed deprecated docs routes */}
                     <Route path="/support" element={<Support />} />
-                    <Route path="/support/track/:token" element={<FeedbackTrack />} />
+                    <Route
+                      path="/support/track/:token"
+                      element={<FeedbackTrack />}
+                    />
                     <Route path="/admin" element={<AdminDashboard />} />
                     <Route path="/admin/categories" element={<Categories />} />
                     <Route path="/admin/articles" element={<Articles />} />

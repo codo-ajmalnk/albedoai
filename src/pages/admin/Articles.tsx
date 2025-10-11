@@ -1,24 +1,70 @@
-import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Eye, EyeOff, Star, StarOff, Search, Filter } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { TableSkeleton } from '@/components/SkeletonLoader';
-import { useToast } from '@/hooks/use-toast';
+import { useState, useEffect } from "react";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
+  EyeOff,
+  Star,
+  StarOff,
+  Search,
+  MoveUp,
+  MoveDown,
+  X,
+  Upload,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { TableSkeleton } from "@/components/SkeletonLoader";
+import { useToast } from "@/hooks/use-toast";
+
+interface ContentBlock {
+  title: string;
+  description: string;
+  images?: string[] | null;
+  videos?: string[] | null;
+}
 
 interface Article {
   id: string;
   title: string;
   slug: string;
-  content: string;
+  content?: ContentBlock[] | null;
   excerpt?: string;
-  tags: string[];
   isPublished: boolean;
   isFeatured: boolean;
   viewCount: number;
@@ -38,128 +84,132 @@ interface Category {
   color: string;
 }
 
-const mockArticles: Article[] = [
-  {
-    id: '1',
-    title: 'Welcome to Albedo - Your First Steps',
-    slug: 'welcome-to-albedo-first-steps',
-    content: 'Full article content here...',
-    excerpt: 'Get started with Albedo by learning the basics of account creation, dashboard navigation, and key features.',
-    tags: ['getting-started', 'basics', 'tutorial'],
-    isPublished: true,
-    isFeatured: true,
-    viewCount: 1247,
-    order: 1,
-    createdAt: '2024-01-15T10:30:00Z',
-    updatedAt: '2024-03-20T14:45:00Z',
-    category: {
-      id: '1',
-      name: 'Getting Started',
-      color: '#3b82f6'
-    }
-  },
-  {
-    id: '2',
-    title: 'How to Reset Your Password',
-    slug: 'how-to-reset-password',
-    content: 'Password reset instructions...',
-    excerpt: 'Learn how to reset your password using email or account settings, including troubleshooting tips.',
-    tags: ['password', 'security', 'account'],
-    isPublished: true,
-    isFeatured: false,
-    viewCount: 892,
-    order: 2,
-    createdAt: '2024-02-01T09:15:00Z',
-    updatedAt: '2024-03-18T11:20:00Z',
-    category: {
-      id: '2',
-      name: 'Account & Billing',
-      color: '#10b981'
-    }
-  },
-  {
-    id: '3',
-    title: 'Troubleshooting Login Issues',
-    slug: 'troubleshooting-login-issues',
-    content: 'Comprehensive troubleshooting guide...',
-    excerpt: 'Comprehensive guide to troubleshooting common login issues including browser problems and network issues.',
-    tags: ['login', 'troubleshooting', 'browser'],
-    isPublished: false,
-    isFeatured: true,
-    viewCount: 0,
-    order: 3,
-    createdAt: '2024-03-10T16:30:00Z',
-    updatedAt: '2024-03-10T16:30:00Z',
-    category: {
-      id: '3',
-      name: 'Technical Issues',
-      color: '#f59e0b'
-    }
-  }
-];
-
-const mockCategories: Category[] = [
-  { id: '1', name: 'Getting Started', color: '#3b82f6' },
-  { id: '2', name: 'Account & Billing', color: '#10b981' },
-  { id: '3', name: 'Technical Issues', color: '#f59e0b' },
-  { id: '4', name: 'Features & Usage', color: '#8b5cf6' },
-  { id: '5', name: 'API & Integration', color: '#06b6d4' }
-];
-
 export default function Articles() {
   const [articles, setArticles] = useState<Article[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [formData, setFormData] = useState({
-    title: '',
-    content: '',
-    excerpt: '',
-    tags: '',
-    categoryId: '',
+    title: "",
+    slug: "",
+    excerpt: "",
+    categoryId: "",
     isPublished: false,
     isFeatured: false,
-    order: 0
+    order: 0,
   });
+  const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([]);
+  const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    // Simulate loading
-    const timer = setTimeout(() => {
-      setArticles(mockArticles);
+  // Fetch articles from API
+  const fetchArticles = async () => {
+    try {
+      const baseUrl = import.meta.env.VITE_API_URL || "";
+      const response = await fetch(`${baseUrl}/api/articles`);
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch articles");
+      }
+
+      const data = await response.json();
+
+      // Transform API response to match our Article interface
+      const transformedArticles: Article[] = data.map((art: any) => ({
+        id: art.id.toString(),
+        title: art.title,
+        slug: art.slug,
+        content: art.content || null,
+        excerpt: art.excerpt,
+        isPublished: art.is_published,
+        isFeatured: art.is_featured,
+        viewCount: art.view_count,
+        order: art.order,
+        createdAt: new Date(art.created_at).toISOString(),
+        updatedAt: new Date(art.updated_at).toISOString(),
+        category: {
+          id: art.category_id.toString(),
+          name: art.category.name,
+          color: art.category.color || "#gray",
+        },
+      }));
+
+      setArticles(transformedArticles);
+    } catch (error) {
+      console.error("Error fetching articles:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load articles.",
+        variant: "destructive",
+      });
+      setArticles([]);
+    } finally {
       setLoading(false);
-    }, 1000);
-    return () => clearTimeout(timer);
+    }
+  };
+
+  // Fetch categories from API
+  const fetchCategories = async () => {
+    try {
+      const baseUrl = import.meta.env.VITE_API_URL || "";
+      const response = await fetch(`${baseUrl}/api/categories`);
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch categories");
+      }
+
+      const data = await response.json();
+
+      const transformedCategories: Category[] = data.map((cat: any) => ({
+        id: cat.id.toString(),
+        name: cat.name,
+        color: cat.color || "#gray",
+      }));
+
+      setCategories(transformedCategories);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      setCategories([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchArticles();
+    fetchCategories();
   }, []);
 
   const handleOpenDialog = (article?: Article) => {
     if (article) {
-      setEditingArticle(article);
+      const latestArticle =
+        articles.find((a) => a.id === article.id) || article;
+
+      setEditingArticle(latestArticle);
       setFormData({
-        title: article.title,
-        content: article.content,
-        excerpt: article.excerpt || '',
-        tags: article.tags.join(', '),
-        categoryId: article.category.id,
-        isPublished: article.isPublished,
-        isFeatured: article.isFeatured,
-        order: article.order
+        title: latestArticle.title,
+        slug: latestArticle.slug,
+        excerpt: latestArticle.excerpt || "",
+        categoryId: latestArticle.category.id,
+        isPublished: latestArticle.isPublished,
+        isFeatured: latestArticle.isFeatured,
+        order: latestArticle.order,
       });
+      setContentBlocks(latestArticle.content || []);
     } else {
       setEditingArticle(null);
       setFormData({
-        title: '',
-        content: '',
-        excerpt: '',
-        tags: '',
-        categoryId: '',
+        title: "",
+        slug: "",
+        excerpt: "",
+        categoryId: "",
         isPublished: false,
         isFeatured: false,
-        order: 0
+        order: 0,
       });
+      setContentBlocks([]);
     }
     setIsDialogOpen(true);
   };
@@ -168,133 +218,397 @@ export default function Articles() {
     setIsDialogOpen(false);
     setEditingArticle(null);
     setFormData({
-      title: '',
-      content: '',
-      excerpt: '',
-      tags: '',
-      categoryId: '',
+      title: "",
+      slug: "",
+      excerpt: "",
+      categoryId: "",
       isPublished: false,
       isFeatured: false,
-      order: 0
+      order: 0,
+    });
+    setContentBlocks([]);
+  };
+
+  // Content Block Management
+  const addContentBlock = () => {
+    setContentBlocks([
+      ...contentBlocks,
+      { title: "", description: "", images: null, videos: null },
+    ]);
+  };
+
+  const removeContentBlock = (index: number) => {
+    setContentBlocks(contentBlocks.filter((_, i) => i !== index));
+  };
+
+  const updateContentBlock = (
+    index: number,
+    field: keyof ContentBlock,
+    value: any
+  ) => {
+    const updated = [...contentBlocks];
+    updated[index] = { ...updated[index], [field]: value };
+    setContentBlocks(updated);
+  };
+
+  const moveContentBlock = (index: number, direction: "up" | "down") => {
+    if (
+      (direction === "up" && index === 0) ||
+      (direction === "down" && index === contentBlocks.length - 1)
+    ) {
+      return;
+    }
+
+    const newIndex = direction === "up" ? index - 1 : index + 1;
+    const updated = [...contentBlocks];
+    [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
+    setContentBlocks(updated);
+  };
+
+  // File upload for content block
+  const handleFileUpload = async (
+    files: FileList | null,
+    fileType: "image" | "video",
+    blockIndex: number
+  ) => {
+    if (!files || files.length === 0) return;
+
+    setUploading(true);
+    const baseUrl = import.meta.env.VITE_API_URL || "";
+    const uploadedUrls: string[] = [];
+
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const formDataUpload = new FormData();
+        formDataUpload.append("file", file);
+
+        const response = await fetch(
+          `${baseUrl}/api/upload?file_type=${fileType}`,
+          {
+            method: "POST",
+            body: formDataUpload,
+          }
+        );
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.detail || "Failed to upload file");
+        }
+
+        const data = await response.json();
+        uploadedUrls.push(data.url);
+      }
+
+      // Update the content block with uploaded files
+      const updated = [...contentBlocks];
+      if (fileType === "image") {
+        updated[blockIndex].images = [
+          ...(updated[blockIndex].images || []),
+          ...uploadedUrls,
+        ];
+      } else {
+        updated[blockIndex].videos = [
+          ...(updated[blockIndex].videos || []),
+          ...uploadedUrls,
+        ];
+      }
+      setContentBlocks(updated);
+
+      toast({
+        title: "Upload successful",
+        description: `${files.length} file(s) uploaded successfully.`,
+      });
+    } catch (error) {
+      console.error("Error uploading files:", error);
+      toast({
+        title: "Upload failed",
+        description:
+          error instanceof Error ? error.message : "Failed to upload files",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Remove file from content block
+  const handleRemoveFile = (
+    blockIndex: number,
+    fileType: "image" | "video",
+    fileUrl: string
+  ) => {
+    const updated = [...contentBlocks];
+    if (fileType === "image") {
+      updated[blockIndex].images = (updated[blockIndex].images || []).filter(
+        (url) => url !== fileUrl
+      );
+    } else {
+      updated[blockIndex].videos = (updated[blockIndex].videos || []).filter(
+        (url) => url !== fileUrl
+      );
+    }
+    setContentBlocks(updated);
+
+    toast({
+      title: "File removed",
+      description: `${fileType === "image" ? "Image" : "Video"} removed.`,
     });
   };
 
-  const handleSubmit = () => {
-    if (!formData.title.trim() || !formData.content.trim() || !formData.categoryId) {
+  const handleSubmit = async () => {
+    if (!formData.title.trim() || !formData.categoryId) {
       toast({
-        title: 'Validation Error',
-        description: 'Please fill in all required fields.',
-        variant: 'destructive'
+        title: "Validation Error",
+        description: "Please fill in title and category.",
+        variant: "destructive",
       });
       return;
     }
 
+    // Auto-generate slug from title if empty
+    const slug =
+      formData.slug.trim() ||
+      formData.title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+
+    const baseUrl = import.meta.env.VITE_API_URL || "";
+
     if (editingArticle) {
       // Update existing article
-      setArticles(prev =>
-        prev.map(article =>
-          article.id === editingArticle.id
-            ? {
-                ...article,
-                ...formData,
-                tags: formData.tags.split(',').map(tag => tag.trim()).filter(Boolean),
-                updatedAt: new Date().toISOString(),
-                category: mockCategories.find(cat => cat.id === formData.categoryId) || article.category
-              }
-            : article
-        )
-      );
-      toast({
-        title: 'Article updated',
-        description: 'The article has been updated successfully.',
-      });
+      try {
+        const updatePayload = {
+          title: formData.title,
+          slug: slug,
+          excerpt: formData.excerpt,
+          content: contentBlocks.length > 0 ? contentBlocks : null,
+          is_published: formData.isPublished,
+          is_featured: formData.isFeatured,
+          order: formData.order,
+          category_id: parseInt(formData.categoryId),
+        };
+
+        const response = await fetch(
+          `${baseUrl}/api/articles/${editingArticle.id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(updatePayload),
+          }
+        );
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.detail || "Failed to update article");
+        }
+
+        toast({
+          title: "Article updated",
+          description: "The article has been updated successfully.",
+        });
+
+        await fetchArticles();
+        window.dispatchEvent(new Event("sidebar-refresh"));
+        handleCloseDialog();
+      } catch (error) {
+        console.error("Error updating article:", error);
+        toast({
+          title: "Error",
+          description:
+            error instanceof Error ? error.message : "Failed to update article",
+          variant: "destructive",
+        });
+      }
     } else {
       // Create new article
-      const newArticle: Article = {
-        id: (articles.length + 1).toString(),
-        ...formData,
-        slug: formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
-        tags: formData.tags.split(',').map(tag => tag.trim()).filter(Boolean),
-        viewCount: 0,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        category: mockCategories.find(cat => cat.id === formData.categoryId) || mockCategories[0]
-      };
-      setArticles(prev => [...prev, newArticle]);
+      try {
+        const createPayload = {
+          title: formData.title,
+          slug: slug,
+          excerpt: formData.excerpt,
+          content: contentBlocks.length > 0 ? contentBlocks : null,
+          is_published: formData.isPublished,
+          is_featured: formData.isFeatured,
+          view_count: 0,
+          order: formData.order,
+          category_id: parseInt(formData.categoryId),
+        };
+
+        const response = await fetch(`${baseUrl}/api/articles`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(createPayload),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.detail || "Failed to create article");
+        }
+
+        toast({
+          title: "Article created",
+          description: "The new article has been created successfully.",
+        });
+
+        await fetchArticles();
+        window.dispatchEvent(new Event("sidebar-refresh"));
+        handleCloseDialog();
+      } catch (error) {
+        console.error("Error creating article:", error);
+        toast({
+          title: "Error",
+          description:
+            error instanceof Error ? error.message : "Failed to create article",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      const baseUrl = import.meta.env.VITE_API_URL || "";
+      const response = await fetch(`${baseUrl}/api/articles/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const error = await response
+          .json()
+          .catch(() => ({ detail: "Failed to delete article" }));
+        throw new Error(error.detail || "Failed to delete article");
+      }
+
       toast({
-        title: 'Article created',
-        description: 'The new article has been created successfully.',
+        title: "Article deleted",
+        description: "The article has been removed successfully.",
+      });
+
+      await fetchArticles();
+      window.dispatchEvent(new Event("sidebar-refresh"));
+    } catch (error) {
+      console.error("Error deleting article:", error);
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Failed to delete article",
+        variant: "destructive",
       });
     }
-    handleCloseDialog();
   };
 
-  const handleDelete = (id: string) => {
-    setArticles(prev => prev.filter(article => article.id !== id));
-    toast({
-      title: 'Article deleted',
-      description: 'The article has been removed successfully.',
-    });
+  const handleTogglePublish = async (id: string) => {
+    const article = articles.find((a) => a.id === id);
+    if (!article) return;
+
+    try {
+      const baseUrl = import.meta.env.VITE_API_URL || "";
+      const response = await fetch(`${baseUrl}/api/articles/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          is_published: !article.isPublished,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update publish status");
+      }
+
+      toast({
+        title: "Status updated",
+        description: "Article publish status has been updated.",
+      });
+
+      await fetchArticles();
+      window.dispatchEvent(new Event("sidebar-refresh"));
+    } catch (error) {
+      console.error("Error updating publish status:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update publish status",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleTogglePublish = (id: string) => {
-    setArticles(prev =>
-      prev.map(article =>
-        article.id === id
-          ? { ...article, isPublished: !article.isPublished, updatedAt: new Date().toISOString() }
-          : article
-      )
-    );
-    toast({
-      title: 'Status updated',
-      description: 'Article publish status has been updated.',
-    });
+  const handleToggleFeatured = async (id: string) => {
+    const article = articles.find((a) => a.id === id);
+    if (!article) return;
+
+    try {
+      const baseUrl = import.meta.env.VITE_API_URL || "";
+      const response = await fetch(`${baseUrl}/api/articles/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          is_featured: !article.isFeatured,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update featured status");
+      }
+
+      toast({
+        title: "Featured status updated",
+        description: "Article featured status has been updated.",
+      });
+
+      await fetchArticles();
+      window.dispatchEvent(new Event("sidebar-refresh"));
+    } catch (error) {
+      console.error("Error updating featured status:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update featured status",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleToggleFeatured = (id: string) => {
-    setArticles(prev =>
-      prev.map(article =>
-        article.id === id
-          ? { ...article, isFeatured: !article.isFeatured, updatedAt: new Date().toISOString() }
-          : article
-      )
-    );
-    toast({
-      title: 'Status updated',
-      description: 'Article featured status has been updated.',
-    });
-  };
-
-  const filteredArticles = articles.filter(article => {
-    const matchesSearch = searchQuery === '' || 
+  const filteredArticles = articles.filter((article) => {
+    const matchesSearch =
+      searchQuery === "" ||
       article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      article.excerpt?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      article.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    const matchesCategory = categoryFilter === 'all' || article.category.id === categoryFilter;
-    const matchesStatus = statusFilter === 'all' || 
-      (statusFilter === 'published' && article.isPublished) ||
-      (statusFilter === 'draft' && !article.isPublished);
-    
+      article.excerpt?.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesCategory =
+      categoryFilter === "all" || article.category.id === categoryFilter;
+    const matchesStatus =
+      statusFilter === "all" ||
+      (statusFilter === "published" && article.isPublished) ||
+      (statusFilter === "draft" && !article.isPublished);
+
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between pt-12 lg:pt-0">
         <div>
           <h1 className="text-3xl font-bold">Articles</h1>
           <p className="text-foreground-muted">
-            Manage your documentation articles and content
+            Manage your documentation articles with structured content blocks
           </p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -304,18 +618,19 @@ export default function Articles() {
               New Article
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
-                {editingArticle ? 'Edit Article' : 'Create New Article'}
+                {editingArticle ? "Edit Article" : "Create New Article"}
               </DialogTitle>
               <DialogDescription>
                 {editingArticle
-                  ? 'Update the article information below.'
-                  : 'Create a new article for your documentation.'}
+                  ? "Update the article information and content blocks below."
+                  : "Create a new article with structured content blocks."}
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4">
+            <div className="space-y-6">
+              {/* Basic Info */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label htmlFor="title" className="text-sm font-medium">
@@ -324,20 +639,53 @@ export default function Articles() {
                   <Input
                     id="title"
                     value={formData.title}
-                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        title: e.target.value,
+                      }))
+                    }
                     placeholder="Article title"
                   />
                 </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="slug" className="text-sm font-medium">
+                    Slug (Optional)
+                  </label>
+                  <Input
+                    id="slug"
+                    value={formData.slug}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        slug: e.target.value,
+                      }))
+                    }
+                    placeholder="article-url-slug"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Leave empty to auto-generate from title (No auto-generation
+                    for articles with a slug already in use, You can still
+                    manually edit the slug)
+                  </p>
+                </div>
+
                 <div className="space-y-2">
                   <label htmlFor="category" className="text-sm font-medium">
                     Category *
                   </label>
-                  <Select value={formData.categoryId} onValueChange={(value) => setFormData(prev => ({ ...prev, categoryId: value }))}>
+                  <Select
+                    value={formData.categoryId}
+                    onValueChange={(value) =>
+                      setFormData((prev) => ({ ...prev, categoryId: value }))
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      {mockCategories.map(category => (
+                      {categories.map((category) => (
                         <SelectItem key={category.id} value={category.id}>
                           {category.name}
                         </SelectItem>
@@ -345,46 +693,7 @@ export default function Articles() {
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
-              
-              <div className="space-y-2">
-                <label htmlFor="excerpt" className="text-sm font-medium">
-                  Excerpt
-                </label>
-                <Textarea
-                  id="excerpt"
-                  value={formData.excerpt}
-                  onChange={(e) => setFormData(prev => ({ ...prev, excerpt: e.target.value }))}
-                  placeholder="Brief description of the article..."
-                  rows={2}
-                />
-              </div>
 
-              <div className="space-y-2">
-                <label htmlFor="content" className="text-sm font-medium">
-                  Content *
-                </label>
-                <Textarea
-                  id="content"
-                  value={formData.content}
-                  onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-                  placeholder="Article content (supports Markdown)..."
-                  rows={12}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label htmlFor="tags" className="text-sm font-medium">
-                    Tags
-                  </label>
-                  <Input
-                    id="tags"
-                    value={formData.tags}
-                    onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value }))}
-                    placeholder="tag1, tag2, tag3"
-                  />
-                </div>
                 <div className="space-y-2">
                   <label htmlFor="order" className="text-sm font-medium">
                     Order
@@ -393,18 +702,253 @@ export default function Articles() {
                     id="order"
                     type="number"
                     value={formData.order}
-                    onChange={(e) => setFormData(prev => ({ ...prev, order: parseInt(e.target.value) || 0 }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        order: parseInt(e.target.value) || 0,
+                      }))
+                    }
                     placeholder="0"
                   />
                 </div>
               </div>
 
-              <div className="flex items-center space-x-4">
+              <div className="space-y-2">
+                <label htmlFor="excerpt" className="text-sm font-medium">
+                  Excerpt
+                </label>
+                <Textarea
+                  id="excerpt"
+                  value={formData.excerpt}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      excerpt: e.target.value,
+                    }))
+                  }
+                  placeholder="Brief description of the article..."
+                  rows={2}
+                />
+              </div>
+
+              {/* Content Blocks */}
+              <div className="space-y-4 border-t pt-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold">Content Blocks</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Add structured content sections with optional media
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={addContentBlock}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Block
+                  </Button>
+                </div>
+
+                {contentBlocks.length === 0 ? (
+                  <div className="text-center py-8 border-2 border-dashed rounded-lg">
+                    <p className="text-muted-foreground">
+                      No content blocks yet. Click "Add Block" to create one.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {contentBlocks.map((block, index) => (
+                      <Card key={index} className="p-4">
+                        <div className="space-y-4">
+                          {/* Block Header */}
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-muted-foreground">
+                              Block {index + 1}
+                            </span>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => moveContentBlock(index, "up")}
+                                disabled={index === 0}
+                              >
+                                <MoveUp className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => moveContentBlock(index, "down")}
+                                disabled={index === contentBlocks.length - 1}
+                              >
+                                <MoveDown className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removeContentBlock(index)}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+
+                          {/* Block Content */}
+                          <div className="space-y-3">
+                            <div>
+                              <label className="text-sm font-medium">
+                                Block Title
+                              </label>
+                              <Input
+                                value={block.title}
+                                onChange={(e) =>
+                                  updateContentBlock(
+                                    index,
+                                    "title",
+                                    e.target.value
+                                  )
+                                }
+                                placeholder="e.g., Introduction, Installation Steps..."
+                              />
+                            </div>
+
+                            <div>
+                              <label className="text-sm font-medium">
+                                Description
+                              </label>
+                              <Textarea
+                                value={block.description}
+                                onChange={(e) =>
+                                  updateContentBlock(
+                                    index,
+                                    "description",
+                                    e.target.value
+                                  )
+                                }
+                                placeholder="Block content..."
+                                rows={4}
+                              />
+                            </div>
+
+                            {/* Images */}
+                            <div>
+                              <label className="text-sm font-medium">
+                                Images (Optional)
+                              </label>
+                              <Input
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                onChange={(e) =>
+                                  handleFileUpload(
+                                    e.target.files,
+                                    "image",
+                                    index
+                                  )
+                                }
+                                disabled={uploading}
+                              />
+                              {block.images && block.images.length > 0 && (
+                                <div className="mt-2 grid grid-cols-3 gap-2">
+                                  {block.images.map((url, imgIdx) => (
+                                    <div
+                                      key={imgIdx}
+                                      className="relative group"
+                                    >
+                                      <img
+                                        src={`${
+                                          import.meta.env.VITE_API_URL || ""
+                                        }${url}`}
+                                        alt={`Block ${index + 1} img ${
+                                          imgIdx + 1
+                                        }`}
+                                        className="w-full h-20 object-cover rounded"
+                                      />
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="destructive"
+                                        className="absolute top-1 right-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100"
+                                        onClick={() =>
+                                          handleRemoveFile(index, "image", url)
+                                        }
+                                      >
+                                        <X className="h-3 w-3" />
+                                      </Button>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Videos */}
+                            <div>
+                              <label className="text-sm font-medium">
+                                Videos (Optional)
+                              </label>
+                              <Input
+                                type="file"
+                                accept="video/*"
+                                multiple
+                                onChange={(e) =>
+                                  handleFileUpload(
+                                    e.target.files,
+                                    "video",
+                                    index
+                                  )
+                                }
+                                disabled={uploading}
+                              />
+                              {block.videos && block.videos.length > 0 && (
+                                <div className="mt-2 space-y-1">
+                                  {block.videos.map((url, vidIdx) => (
+                                    <div
+                                      key={vidIdx}
+                                      className="flex items-center justify-between bg-secondary p-2 rounded"
+                                    >
+                                      <span className="text-sm truncate">
+                                        Video {vidIdx + 1}:{" "}
+                                        {url.split("/").pop()}
+                                      </span>
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() =>
+                                          handleRemoveFile(index, "video", url)
+                                        }
+                                      >
+                                        <X className="h-3 w-3" />
+                                      </Button>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Publish Options */}
+              <div className="flex items-center space-x-4 border-t pt-4">
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="isPublished"
                     checked={formData.isPublished}
-                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isPublished: !!checked }))}
+                    onCheckedChange={(checked) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        isPublished: !!checked,
+                      }))
+                    }
                   />
                   <label htmlFor="isPublished" className="text-sm font-medium">
                     Published
@@ -414,7 +958,12 @@ export default function Articles() {
                   <Checkbox
                     id="isFeatured"
                     checked={formData.isFeatured}
-                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isFeatured: !!checked }))}
+                    onCheckedChange={(checked) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        isFeatured: !!checked,
+                      }))
+                    }
                   />
                   <label htmlFor="isFeatured" className="text-sm font-medium">
                     Featured
@@ -426,8 +975,13 @@ export default function Articles() {
               <Button variant="outline" onClick={handleCloseDialog}>
                 Cancel
               </Button>
-              <Button onClick={handleSubmit}>
-                {editingArticle ? 'Update' : 'Create'} Article
+              <Button onClick={handleSubmit} disabled={uploading}>
+                {uploading
+                  ? "Uploading..."
+                  : editingArticle
+                  ? "Update"
+                  : "Create"}{" "}
+                Article
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -455,7 +1009,7 @@ export default function Articles() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
-                {mockCategories.map(category => (
+                {categories.map((category) => (
                   <SelectItem key={category.id} value={category.id}>
                     {category.name}
                   </SelectItem>
@@ -493,6 +1047,7 @@ export default function Articles() {
                 <TableRow>
                   <TableHead>Title</TableHead>
                   <TableHead>Category</TableHead>
+                  <TableHead>Blocks</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Views</TableHead>
                   <TableHead>Created</TableHead>
@@ -505,47 +1060,53 @@ export default function Articles() {
                     <TableCell className="font-medium">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          {article.isFeatured && <Star className="h-4 w-4 text-yellow-500 fill-current" />}
+                          {article.isFeatured && (
+                            <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                          )}
                           <span className="font-medium">{article.title}</span>
                         </div>
-                        <div className="text-sm text-foreground-muted truncate max-w-xs">
-                          {article.excerpt}
-                        </div>
-                        {article.tags.length > 0 && (
-                          <div className="flex gap-1 flex-wrap">
-                            {article.tags.slice(0, 3).map(tag => (
-                              <Badge key={tag} variant="outline" className="text-xs">
-                                {tag}
-                              </Badge>
-                            ))}
-                            {article.tags.length > 3 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{article.tags.length - 3}
-                              </Badge>
-                            )}
+                        {article.excerpt && (
+                          <div className="text-sm text-foreground-muted truncate max-w-xs">
+                            {article.excerpt}
                           </div>
                         )}
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge 
-                        variant="outline" 
-                        style={{ borderColor: article.category.color, color: article.category.color }}
+                      <Badge
+                        variant="outline"
+                        style={{
+                          borderColor: article.category.color,
+                          color: article.category.color,
+                        }}
                       >
                         {article.category.name}
                       </Badge>
                     </TableCell>
                     <TableCell>
+                      <Badge variant="secondary">
+                        {article.content?.length || 0} blocks
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
                       <div className="flex items-center gap-2">
-                        <Badge variant={article.isPublished ? 'default' : 'secondary'}>
-                          {article.isPublished ? 'Published' : 'Draft'}
+                        <Badge
+                          variant={
+                            article.isPublished ? "default" : "secondary"
+                          }
+                        >
+                          {article.isPublished ? "Published" : "Draft"}
                         </Badge>
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => handleTogglePublish(article.id)}
                         >
-                          {article.isPublished ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          {article.isPublished ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
                         </Button>
                       </div>
                     </TableCell>
@@ -566,7 +1127,11 @@ export default function Articles() {
                           size="sm"
                           onClick={() => handleToggleFeatured(article.id)}
                         >
-                          {article.isFeatured ? <StarOff className="h-4 w-4" /> : <Star className="h-4 w-4" />}
+                          {article.isFeatured ? (
+                            <StarOff className="h-4 w-4" />
+                          ) : (
+                            <Star className="h-4 w-4" />
+                          )}
                         </Button>
                         <Button
                           variant="ghost"
