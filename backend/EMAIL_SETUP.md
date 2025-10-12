@@ -49,10 +49,10 @@ ENABLE_EMAIL=true
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USERNAME=your-email@gmail.com
-SMTP_PASSWORD=xxxx xxxx xxxx xxxx  # The 16-char app password (remove spaces)
+SMTP_PASSWORD=xxxx xxxx xxxx xxxx  # The 16-char app password 
 SMTP_FROM_EMAIL=your-email@gmail.com
 SMTP_FROM_NAME=Albedo Support
-FRONTEND_URL=http://localhost:5173
+FRONTEND_URL=frontend_url
 ```
 
 ## Other Email Providers

@@ -2,7 +2,7 @@
 Pydantic schemas for API request/response validation and serialization.
 """
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, List, Literal
 from datetime import datetime
 
 
@@ -34,6 +34,38 @@ class SearchResult(BaseModel):
     url: Optional[str] = None
     category: SearchResultCategory
     relevance: str
+
+# User-related schemas
+
+
+class UserCreate(BaseModel):
+    username: str
+    email: str
+    password: str
+    role: Literal["admin", "moderator", "user"] = "user"
+    status: Literal["active", "inactive"] = "active"
+
+
+class UserResponse(BaseModel):
+    """Schema for user responses."""
+    id: int
+    username: str
+    email: str
+    role: str
+    status: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class UserUpdate(BaseModel):
+    """Schema for updating users."""
+    email: Optional[str] = None
+    password: Optional[str] = None
+    role: Optional[Literal["admin", "moderator", "user"]] = None
+    status: Optional[Literal["active", "inactive"]] = None
 
 
 # Category-related schemas
@@ -153,3 +185,26 @@ class FeedbackUpdate(BaseModel):
     """Schema for updating feedback."""
     status: Optional[str] = None
     admin_response: Optional[str] = None
+
+
+# Authentication schemas
+class LoginRequest(BaseModel):
+    """Schema for login request."""
+    username: str
+    password: str
+
+
+class TokenResponse(BaseModel):
+    """Schema for token response."""
+    access_token: str
+    token_type: str = "bearer"
+    user: UserResponse
+
+
+class CurrentUser(BaseModel):
+    """Schema for current authenticated user."""
+    id: int
+    username: str
+    email: str
+    role: str
+    status: str

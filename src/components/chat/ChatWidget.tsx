@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   MessageCircle,
   X,
@@ -50,6 +51,7 @@ interface Article {
 }
 
 export function ChatWidget() {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
@@ -479,10 +481,7 @@ export function ChatWidget() {
                                     size="sm"
                                     className="h-5 w-5 sm:h-6 sm:w-6 p-0 flex-shrink-0"
                                     onClick={() =>
-                                      window.open(
-                                        `/docs/${result.slug}`,
-                                        "_blank"
-                                      )
+                                      navigate(`/docs/${result.slug}`)
                                     }
                                   >
                                     <ExternalLink className="h-3 w-3" />

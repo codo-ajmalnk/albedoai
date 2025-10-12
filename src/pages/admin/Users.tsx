@@ -1,16 +1,15 @@
 import { useState, useEffect } from "react";
 import {
   Search,
-  Filter,
   MoreHorizontal,
   UserPlus,
-  Mail,
-  Phone,
-  Calendar,
+  Edit,
+  Trash2,
   Shield,
   CheckCircle,
   XCircle,
   Clock,
+  Plus,
 } from "lucide-react";
 import {
   Card,
@@ -45,99 +44,295 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Label } from "@/components/ui/label";
 import { TableSkeleton, CardSkeleton } from "@/components/SkeletonLoader";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
-const mockUsers = [
-  {
-    id: 1,
-    name: "John Doe",
-    email: "john@example.com",
-    role: "admin",
-    status: "active",
-    lastActive: "2 hours ago",
-    joinDate: "2024-01-15",
-    phone: "+1 (555) 123-4567",
-    avatar: null,
-  },
-  {
-    id: 2,
-    name: "Sarah Wilson",
-    email: "sarah@example.com",
-    role: "moderator",
-    status: "active",
-    lastActive: "1 day ago",
-    joinDate: "2024-02-20",
-    phone: "+1 (555) 234-5678",
-    avatar: null,
-  },
-  {
-    id: 3,
-    name: "Mike Johnson",
-    email: "mike@example.com",
-    role: "user",
-    status: "inactive",
-    lastActive: "1 week ago",
-    joinDate: "2024-01-10",
-    phone: "+1 (555) 345-6789",
-    avatar: null,
-  },
-  {
-    id: 4,
-    name: "Emily Davis",
-    email: "emily@example.com",
-    role: "user",
-    status: "pending",
-    lastActive: "Never",
-    joinDate: "2024-03-01",
-    phone: "+1 (555) 456-7890",
-    avatar: null,
-  },
-  {
-    id: 5,
-    name: "Alex Brown",
-    email: "alex@example.com",
-    role: "moderator",
-    status: "active",
-    lastActive: "3 hours ago",
-    joinDate: "2024-02-05",
-    phone: "+1 (555) 567-8901",
-    avatar: null,
-  },
-];
+interface User {
+  id: string;
+  username: string;
+  email: string;
+  role: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
 
 const roleColors = {
-  admin: "bg-red-100 text-red-800",
-  moderator: "bg-blue-100 text-blue-800",
-  user: "bg-green-100 text-green-800",
+  admin: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+  moderator: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+  user: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
 };
 
 const statusColors = {
-  active: "bg-green-100 text-green-800",
-  inactive: "bg-gray-100 text-gray-800",
-  pending: "bg-yellow-100 text-yellow-800",
+  active: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+  inactive: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200",
 };
 
 const statusIcons = {
   active: CheckCircle,
   inactive: XCircle,
-  pending: Clock,
 };
 
 export default function Users() {
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+    role: "user",
+    status: "active",
+  });
+  const { toast } = useToast();
+  const { token } = useAuth();
+
+  const fetchUsers = async () => {
+    try {
+      const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:3001";
+      const response = await fetch(`${baseUrl}/api/users`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch users");
+      }
+
+      const data = await response.json();
+
+      const transformedUsers: User[] = data.map((user: any) => ({
+        id: user.id.toString(),
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        status: user.status,
+        created_at: user.created_at,
+        updated_at: user.updated_at,
+      }));
+
+      setUsers(transformedUsers);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load users.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    // Simulate loading
-    const timer = setTimeout(() => setLoading(false), 1000);
-    return () => clearTimeout(timer);
+    fetchUsers();
   }, []);
 
-  const filteredUsers = mockUsers.filter((user) => {
+  const handleOpenDialog = (user?: User) => {
+    if (user) {
+      setEditingUser(user);
+      setFormData({
+        username: user.username,
+        email: user.email,
+        password: "", // Don't show password
+        role: user.role,
+        status: user.status,
+      });
+    } else {
+      setEditingUser(null);
+      setFormData({
+        username: "",
+        email: "",
+        password: "",
+        role: "user",
+        status: "active",
+      });
+    }
+    setIsDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+    setEditingUser(null);
+    setFormData({
+      username: "",
+      email: "",
+      password: "",
+      role: "user",
+      status: "active",
+    });
+  };
+
+  const handleSubmit = async () => {
+    const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:3001";
+
+    if (editingUser) {
+      // Update existing user
+      try {
+        const updatePayload: any = {
+          email: formData.email,
+          role: formData.role,
+          status: formData.status,
+        };
+
+        // Only include password if it's been changed
+        if (formData.password.trim()) {
+          updatePayload.password = formData.password;
+        }
+
+        const response = await fetch(`${baseUrl}/api/users/${editingUser.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(updatePayload),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.detail || "Failed to update user");
+        }
+
+        toast({
+          title: "User updated",
+          description: "The user has been updated successfully.",
+        });
+
+        await fetchUsers();
+        handleCloseDialog();
+      } catch (error) {
+        console.error("Error updating user:", error);
+        toast({
+          title: "Error",
+          description:
+            error instanceof Error ? error.message : "Failed to update user",
+          variant: "destructive",
+        });
+      }
+    } else {
+      // Create new user
+      if (
+        !formData.username.trim() ||
+        !formData.email.trim() ||
+        !formData.password.trim()
+      ) {
+        toast({
+          title: "Validation Error",
+          description: "Please fill in all required fields.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      try {
+        const response = await fetch(`${baseUrl}/api/users`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            username: formData.username,
+            email: formData.email,
+            password: formData.password,
+            role: formData.role,
+            status: formData.status,
+          }),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.detail || "Failed to create user");
+        }
+
+        toast({
+          title: "User created",
+          description: "The new user has been created successfully.",
+        });
+
+        await fetchUsers();
+        handleCloseDialog();
+      } catch (error) {
+        console.error("Error creating user:", error);
+        toast({
+          title: "Error",
+          description:
+            error instanceof Error ? error.message : "Failed to create user",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!userToDelete) return;
+
+    try {
+      const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:3001";
+      const response = await fetch(`${baseUrl}/api/users/${userToDelete.id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response
+          .json()
+          .catch(() => ({ detail: "Failed to delete user" }));
+        throw new Error(error.detail || "Failed to delete user");
+      }
+
+      toast({
+        title: "User deleted",
+        description: "The user has been removed successfully.",
+      });
+
+      await fetchUsers();
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Failed to delete user",
+        variant: "destructive",
+      });
+    } finally {
+      setUserToDelete(null);
+    }
+  };
+
+  const filteredUsers = users.filter((user) => {
     const matchesSearch =
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesRole = roleFilter === "all" || user.role === roleFilter;
     const matchesStatus =
@@ -147,13 +342,21 @@ export default function Users() {
   });
 
   const getStatusIcon = (status: string) => {
-    const Icon = statusIcons[status as keyof typeof statusIcons];
+    const Icon = statusIcons[status as keyof typeof statusIcons] || Clock;
     return <Icon className="h-4 w-4" />;
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
   };
 
   return (
     <div className="space-y-8">
-      {/* Header - Add padding-top on mobile to avoid sidebar button overlap */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-12 lg:pt-0">
         <div>
           <h1 className="text-3xl font-bold">User Management</h1>
@@ -161,10 +364,129 @@ export default function Users() {
             Manage user accounts, roles, and permissions
           </p>
         </div>
-        <Button className="w-full sm:w-auto">
-          <UserPlus className="h-4 w-4 mr-2" />
-          Add User
-        </Button>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button
+              className="w-full sm:w-auto"
+              onClick={() => handleOpenDialog()}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add User
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                {editingUser ? "Edit User" : "Create New User"}
+              </DialogTitle>
+              <DialogDescription>
+                {editingUser
+                  ? "Update user information below."
+                  : "Create a new user account with role and status."}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="username">Username *</Label>
+                <Input
+                  id="username"
+                  value={formData.username}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      username: e.target.value,
+                    }))
+                  }
+                  placeholder="username"
+                  disabled={!!editingUser} // Can't change username
+                />
+                {editingUser && (
+                  <p className="text-xs text-muted-foreground">
+                    Username cannot be changed
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="email">Email *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, email: e.target.value }))
+                  }
+                  placeholder="user@example.com"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password">
+                  Password {editingUser ? "(Leave empty to keep current)" : "*"}
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      password: e.target.value,
+                    }))
+                  }
+                  placeholder={editingUser ? "••••••••" : "Enter password"}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="role">Role *</Label>
+                  <Select
+                    value={formData.role}
+                    onValueChange={(value) =>
+                      setFormData((prev) => ({ ...prev, role: value }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="user">User</SelectItem>
+                      <SelectItem value="moderator">Moderator</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="status">Status *</Label>
+                  <Select
+                    value={formData.status}
+                    onValueChange={(value) =>
+                      setFormData((prev) => ({ ...prev, status: value }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={handleCloseDialog}>
+                Cancel
+              </Button>
+              <Button onClick={handleSubmit}>
+                {editingUser ? "Update" : "Create"} User
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Stats Cards */}
@@ -185,9 +507,9 @@ export default function Users() {
                 <Shield className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{mockUsers.length}</div>
+                <div className="text-2xl font-bold">{users.length}</div>
                 <p className="text-xs text-muted-foreground">
-                  +12% from last month
+                  All registered users
                 </p>
               </CardContent>
             </Card>
@@ -201,14 +523,16 @@ export default function Users() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {mockUsers.filter((u) => u.status === "active").length}
+                  {users.filter((u) => u.status === "active").length}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {Math.round(
-                    (mockUsers.filter((u) => u.status === "active").length /
-                      mockUsers.length) *
-                      100
-                  )}
+                  {users.length > 0
+                    ? Math.round(
+                        (users.filter((u) => u.status === "active").length /
+                          users.length) *
+                          100
+                      )
+                    : 0}
                   % of total
                 </p>
               </CardContent>
@@ -221,7 +545,7 @@ export default function Users() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {mockUsers.filter((u) => u.role === "admin").length}
+                  {users.filter((u) => u.role === "admin").length}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   System administrators
@@ -231,15 +555,17 @@ export default function Users() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Pending</CardTitle>
-                <Clock className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium">
+                  Moderators
+                </CardTitle>
+                <Shield className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {mockUsers.filter((u) => u.status === "pending").length}
+                  {users.filter((u) => u.role === "moderator").length}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Awaiting approval
+                  Content moderators
                 </p>
               </CardContent>
             </Card>
@@ -283,7 +609,6 @@ export default function Users() {
                 <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="active">Active</SelectItem>
                 <SelectItem value="inactive">Inactive</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -298,9 +623,8 @@ export default function Users() {
                     <TableHead>User</TableHead>
                     <TableHead>Role</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Last Active</TableHead>
-                    <TableHead>Join Date</TableHead>
-                    <TableHead className="w-[50px]"></TableHead>
+                    <TableHead>Created</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -310,14 +634,11 @@ export default function Users() {
                         <div className="flex items-center space-x-3">
                           <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                             <span className="text-sm font-medium">
-                              {user.name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")}
+                              {user.username.charAt(0).toUpperCase()}
                             </span>
                           </div>
                           <div>
-                            <div className="font-medium">{user.name}</div>
+                            <div className="font-medium">{user.username}</div>
                             <div className="text-sm text-muted-foreground">
                               {user.email}
                             </div>
@@ -348,39 +669,26 @@ export default function Users() {
                         </div>
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
-                        {user.lastActive}
+                        {formatDate(user.created_at)}
                       </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {new Date(user.joinDate).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem>
-                              <Mail className="h-4 w-4 mr-2" />
-                              Send Email
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Phone className="h-4 w-4 mr-2" />
-                              Call User
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem>
-                              <Calendar className="h-4 w-4 mr-2" />
-                              View Activity
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive">
-                              <XCircle className="h-4 w-4 mr-2" />
-                              Deactivate
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleOpenDialog(user)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setUserToDelete(user)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -400,6 +708,31 @@ export default function Users() {
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog
+        open={!!userToDelete}
+        onOpenChange={(open) => !open && setUserToDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the user "{userToDelete?.username}".
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

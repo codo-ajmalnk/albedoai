@@ -22,6 +22,13 @@ class Settings(BaseSettings):
         "*"
     ]
 
+    # JWT settings
+    jwt_secret_key: str = os.getenv(
+        "JWT_SECRET_KEY", "your-secret-key-change-in-production")
+    jwt_algorithm: str = os.getenv("JWT_ALGORITHM", "HS256")
+    jwt_access_token_expire_minutes: int = int(
+        os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))  # 24 hours
+
     # Email settings
     smtp_host: str = os.getenv("SMTP_HOST", "smtp.gmail.com")
     smtp_port: int = int(os.getenv("SMTP_PORT"))

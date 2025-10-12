@@ -1,18 +1,35 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
     <title>Albedo AI - Documentation & Support</title>
-    <meta name="description" content="Professional support documentation and feedback platform for Albedo AI. Get help, browse docs, and submit feedback." />
+    <meta
+      name="description"
+      content="Professional support documentation and feedback platform for Albedo AI. Get help, browse docs, and submit feedback."
+    />
     <meta name="author" content="Albedo AI" />
-    <meta name="keywords" content="albedo ai, documentation, support, feedback, help, api, sdk" />
+    <meta
+      name="keywords"
+      content="albedo ai, documentation, support, feedback, help, api, sdk"
+    />
     <meta name="theme-color" content="#6366f1" />
     <meta name="color-scheme" content="light dark" />
-    
+
+    <!-- Prevent caching of HTML -->
+    <meta
+      http-equiv="Cache-Control"
+      content="no-cache, no-store, must-revalidate"
+    />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
-    
+
     <!-- PWA Capable -->
     <meta name="mobile-web-app-capable" content="yes" />
     <!-- iOS PWA Support -->
@@ -20,11 +37,11 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Albedo AI" />
     <link rel="apple-touch-icon" href="/icon-192.png" />
-    
+
     <!-- Preconnect for fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    
+
     <!-- Performance optimizations -->
     <link rel="dns-prefetch" href="//api.albedoedu.com" />
     <link rel="preconnect" href="//api.albedoedu.com" crossorigin />
@@ -32,27 +49,57 @@
     <meta property="og:title" content="albedo-helper-ai" />
     <meta property="og:description" content="Lovable Generated Project" />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta
+      property="og:image"
+      content="https://lovable.dev/opengraph-image-p98pqg.png"
+    />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@lovable_dev" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta
+      name="twitter:image"
+      content="https://lovable.dev/opengraph-image-p98pqg.png"
+    />
   </head>
 
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    
+
     <!-- Service Worker Registration -->
     <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
-            .then(registration => {
-              console.log('SW registered: ', registration);
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("/sw.js", { updateViaCache: "none" })
+            .then((registration) => {
+              console.log("SW registered: ", registration);
+
+              // Force check for updates on page load
+              registration.update();
+
+              // Listen for updates
+              registration.addEventListener("updatefound", () => {
+                const newWorker = registration.installing;
+                console.log("New service worker found, installing...");
+
+                newWorker.addEventListener("statechange", () => {
+                  if (
+                    newWorker.state === "installed" &&
+                    navigator.serviceWorker.controller
+                  ) {
+                    // New service worker available
+                    console.log(
+                      "New content available, will refresh on next page load"
+                    );
+                    // Tell the new service worker to take over immediately
+                    newWorker.postMessage({ type: "SKIP_WAITING" });
+                  }
+                });
+              });
             })
-            .catch(registrationError => {
-              console.log('SW registration failed: ', registrationError);
+            .catch((registrationError) => {
+              console.log("SW registration failed: ", registrationError);
             });
         });
       }

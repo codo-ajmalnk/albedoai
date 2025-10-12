@@ -477,55 +477,15 @@ export default function Support() {
                   Request Submitted Successfully
                 </CardTitle>
                 <CardDescription>
-                  Your support request has been received. You can track its
-                  status using the link below.
+                  Your support request has been received.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <p className="text-sm text-muted-foreground">
-                    We've sent a confirmation email to{" "}
-                    <strong>{formData.email}</strong> with your tracking
-                    information.
-                  </p>
-                  <div className="p-4 bg-secondary rounded-lg">
-                    <p className="text-sm font-medium mb-2">
-                      Track your request:
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        value={`${window.location.origin}/support/track/${submittedToken}`}
-                        readOnly
-                        className="font-mono text-xs"
-                      />
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          navigator.clipboard.writeText(
-                            `${window.location.origin}/support/track/${submittedToken}`
-                          );
-                          toast({
-                            title: "Link copied",
-                            description: "Tracking link copied to clipboard.",
-                          });
-                        }}
-                      >
-                        Copy
-                      </Button>
-                    </div>
-                  </div>
-                  <Button
-                    variant="outline"
-                    onClick={() =>
-                      window.open(`/support/track/${submittedToken}`, "_blank")
-                    }
-                    className="w-full"
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Open Tracking Page
-                  </Button>
-                </div>
+                <p className="text-sm text-muted-foreground">
+                  We've sent a confirmation email to{" "}
+                  <strong>{formData.email}</strong> with a tracking link to
+                  monitor the status of your request.
+                </p>
               </CardContent>
             </Card>
           </div>

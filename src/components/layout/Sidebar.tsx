@@ -26,6 +26,8 @@ import {
   Search,
   MessageCircle,
   ChevronRight,
+  LogOut,
+  User,
 } from "lucide-react";
 import {
   Collapsible,
@@ -37,6 +39,7 @@ import { SidebarFooter, SidebarSeparator } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SearchModal } from "@/components/SearchModal";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Custom hook to check if device is mobile or tablet (for sidebar purposes)
 function useIsMobileOrTablet() {
@@ -207,6 +210,9 @@ export function AppSidebar() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
   const [loadingDocs, setLoadingDocs] = useState(true);
+
+  // Auth hook - must be called at top level
+  const { user, logout } = useAuth();
 
   // Fetch categories and articles
   const fetchDocsData = async () => {
@@ -446,6 +452,50 @@ export function AppSidebar() {
           {/* Footer actions */}
           <SidebarSeparator />
           <SidebarFooter className={cn("mt-auto", collapsed && "items-center")}>
+            {/* User info and logout (only on admin routes) */}
+            {isAdminRoute && user && (
+              <>
+                <div
+                  className={cn(
+                    "px-3 py-2 mb-2 rounded-md bg-secondary/50",
+                    collapsed && "px-2"
+                  )}
+                >
+                  {!collapsed ? (
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-medium">
+                        {user.username.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">
+                          {user.username}
+                        </p>
+                        <p className="text-xs text-muted-foreground capitalize">
+                          {user.role}
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-medium">
+                      {user.username.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={logout}
+                  className={cn(
+                    "h-9 w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10",
+                    collapsed && "w-9 p-0 justify-center"
+                  )}
+                >
+                  <LogOut className="h-4 w-4" />
+                  {!collapsed && <span className="ml-2">Logout</span>}
+                </Button>
+              </>
+            )}
+
             {/* Search trigger */}
             <Button
               variant="ghost"

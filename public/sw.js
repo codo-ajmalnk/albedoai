@@ -1,92 +1,109 @@
-const CACHE_NAME = 'albedo-ai-v1.0.0';
-const STATIC_CACHE = 'albedo-static-v1.0.0';
-const DYNAMIC_CACHE = 'albedo-dynamic-v1.0.0';
+// Auto-increment this version on each deployment to force cache refresh
+const VERSION = "v" + Date.now();
+const CACHE_NAME = `albedo-ai-${VERSION}`;
+const STATIC_CACHE = `albedo-static-${VERSION}`;
+const DYNAMIC_CACHE = `albedo-dynamic-${VERSION}`;
 
 // Cache strategies
 const CACHE_STRATEGIES = {
-  CACHE_FIRST: 'cache-first',
-  NETWORK_FIRST: 'network-first',
-  STALE_WHILE_REVALIDATE: 'stale-while-revalidate'
+  CACHE_FIRST: "cache-first",
+  NETWORK_FIRST: "network-first",
+  STALE_WHILE_REVALIDATE: "stale-while-revalidate",
 };
 
-// Assets to cache immediately
-const STATIC_ASSETS = [
-  '/',
-  '/docs',
-  '/support',
-  '/admin',
-  '/static/js/bundle.js',
-  '/static/css/main.css',
-  '/manifest.json'
-];
-
 // API routes that should use network-first strategy
-const API_ROUTES = [
-  '/api/',
-  '/auth/'
-];
+const API_ROUTES = ["/api/", "/auth/"];
+
+// Message handler for skip waiting
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    console.log("SW: Received SKIP_WAITING message");
+    self.skipWaiting();
+  }
+});
 
 // Install event - cache static assets
-self.addEventListener('install', (event) => {
-  console.log('SW: Installing service worker');
-  
+self.addEventListener("install", (event) => {
+  console.log("SW: Installing service worker", VERSION);
+
   event.waitUntil(
-    caches.open(STATIC_CACHE)
+    caches
+      .open(STATIC_CACHE)
       .then((cache) => {
-        console.log('SW: Caching static assets');
-        return cache.addAll(STATIC_ASSETS);
+        console.log("SW: Caching static assets");
+        // Cache offline page only - let other assets be cached on demand
+        return cache.add("/offline.html").catch(() => {
+          console.log("SW: Offline page not available, skipping");
+        });
       })
       .then(() => {
-        console.log('SW: Static assets cached successfully');
+        console.log("SW: Static assets cached successfully");
+        // Force the waiting service worker to become active
         return self.skipWaiting();
       })
       .catch((error) => {
-        console.error('SW: Failed to cache static assets:', error);
+        console.error("SW: Failed to cache static assets:", error);
       })
   );
 });
 
 // Activate event - clean up old caches
-self.addEventListener('activate', (event) => {
-  console.log('SW: Activating service worker');
-  
+self.addEventListener("activate", (event) => {
+  console.log("SW: Activating service worker");
+
   event.waitUntil(
-    caches.keys()
+    caches
+      .keys()
       .then((cacheNames) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
-            if (cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE) {
-              console.log('SW: Deleting old cache:', cacheName);
+            // Delete all old caches that don't match current version
+            if (
+              cacheName !== STATIC_CACHE &&
+              cacheName !== DYNAMIC_CACHE &&
+              cacheName !== CACHE_NAME
+            ) {
+              console.log("SW: Deleting old cache:", cacheName);
               return caches.delete(cacheName);
             }
           })
         );
       })
       .then(() => {
-        console.log('SW: Service worker activated');
+        console.log("SW: Service worker activated and old caches cleared");
+        // Take control of all pages immediately
         return self.clients.claim();
       })
   );
 });
 
 // Fetch event - implement caching strategies
-self.addEventListener('fetch', (event) => {
+self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
   // Skip non-GET requests
-  if (request.method !== 'GET') {
+  if (request.method !== "GET") {
     return;
   }
 
   // Skip chrome-extension and other non-http(s) URLs
-  if (!url.protocol.startsWith('http')) {
+  if (!url.protocol.startsWith("http")) {
+    return;
+  }
+
+  // For HTML pages, always use network-first to get fresh content
+  if (
+    request.headers.get("accept")?.includes("text/html") ||
+    url.pathname === "/"
+  ) {
+    event.respondWith(networkFirst(request));
     return;
   }
 
   // Determine cache strategy based on request
   let strategy = CACHE_STRATEGIES.STALE_WHILE_REVALIDATE;
-  
+
   if (isApiRequest(url.pathname)) {
     strategy = CACHE_STRATEGIES.NETWORK_FIRST;
   } else if (isStaticAsset(url.pathname)) {
@@ -102,7 +119,7 @@ async function cacheFirst(request) {
   if (cached) {
     return cached;
   }
-  
+
   try {
     const response = await fetch(request);
     if (response.ok) {
@@ -111,9 +128,9 @@ async function cacheFirst(request) {
     }
     return response;
   } catch (error) {
-    console.error('SW: Cache-first fetch failed:', error);
+    console.error("SW: Cache-first fetch failed:", error);
     // Return offline fallback if available
-    return caches.match('/offline.html') || new Response('Offline');
+    return caches.match("/offline.html") || new Response("Offline");
   }
 }
 
@@ -127,7 +144,7 @@ async function networkFirst(request) {
     }
     return response;
   } catch (error) {
-    console.log('SW: Network failed, trying cache:', request.url);
+    console.log("SW: Network failed, trying cache:", request.url);
     const cached = await caches.match(request);
     if (cached) {
       return cached;
@@ -139,23 +156,25 @@ async function networkFirst(request) {
 // Stale-while-revalidate strategy for pages
 async function staleWhileRevalidate(request) {
   const cached = await caches.match(request);
-  const networkPromise = fetch(request).then(async (response) => {
-    if (response.ok) {
-      // Clone immediately before the body is consumed by the browser
-      const responseClone = response.clone();
-      try {
-        const cache = await caches.open(DYNAMIC_CACHE);
-        await cache.put(request, responseClone);
-      } catch (e) {
-        // Cache put failures should not block the network response
-        console.warn('SW: Failed to cache (SWR):', e);
+  const networkPromise = fetch(request)
+    .then(async (response) => {
+      if (response.ok) {
+        // Clone immediately before the body is consumed by the browser
+        const responseClone = response.clone();
+        try {
+          const cache = await caches.open(DYNAMIC_CACHE);
+          await cache.put(request, responseClone);
+        } catch (e) {
+          // Cache put failures should not block the network response
+          console.warn("SW: Failed to cache (SWR):", e);
+        }
       }
-    }
-    return response;
-  }).catch(() => {
-    // Network failed, return cached version if available
-    return cached;
-  });
+      return response;
+    })
+    .catch(() => {
+      // Network failed, return cached version if available
+      return cached;
+    });
 
   return cached || networkPromise;
 }
@@ -175,16 +194,18 @@ async function handleRequest(request, strategy) {
 
 // Helper functions
 function isApiRequest(pathname) {
-  return API_ROUTES.some(route => pathname.startsWith(route));
+  return API_ROUTES.some((route) => pathname.startsWith(route));
 }
 
 function isStaticAsset(pathname) {
-  return /\.(js|css|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot|ico)$/.test(pathname);
+  return /\.(js|css|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot|ico)$/.test(
+    pathname
+  );
 }
 
 // Background sync for offline form submissions
-self.addEventListener('sync', (event) => {
-  if (event.tag === 'background-sync-feedback') {
+self.addEventListener("sync", (event) => {
+  if (event.tag === "background-sync-feedback") {
     event.waitUntil(processPendingFeedback());
   }
 });
@@ -193,36 +214,34 @@ async function processPendingFeedback() {
   try {
     const cache = await caches.open(DYNAMIC_CACHE);
     // Process any pending feedback submissions stored in IndexedDB
-    console.log('SW: Processing pending feedback submissions');
+    console.log("SW: Processing pending feedback submissions");
   } catch (error) {
-    console.error('SW: Failed to process pending feedback:', error);
+    console.error("SW: Failed to process pending feedback:", error);
   }
 }
 
 // Push notification handler
-self.addEventListener('push', (event) => {
+self.addEventListener("push", (event) => {
   if (!event.data) return;
 
   const data = event.data.json();
-  const title = data.title || 'Albedo AI';
+  const title = data.title || "Albedo AI";
   const options = {
-    body: data.body || 'You have a new notification',
-    icon: '/icon-192.png',
-    badge: '/icon-192.png',
-    tag: data.tag || 'general',
+    body: data.body || "You have a new notification",
+    icon: "/icon-192.png",
+    badge: "/icon-192.png",
+    tag: data.tag || "general",
     renotify: true,
     requireInteraction: data.requireInteraction || false,
     actions: data.actions || [],
-    data: data.data || {}
+    data: data.data || {},
   };
 
-  event.waitUntil(
-    self.registration.showNotification(title, options)
-  );
+  event.waitUntil(self.registration.showNotification(title, options));
 });
 
 // Notification click handler
-self.addEventListener('notificationclick', (event) => {
+self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
   if (event.action) {
@@ -230,21 +249,19 @@ self.addEventListener('notificationclick', (event) => {
     handleNotificationAction(event.action, event.notification.data);
   } else {
     // Default click - open app
-    event.waitUntil(
-      clients.openWindow(event.notification.data.url || '/')
-    );
+    event.waitUntil(clients.openWindow(event.notification.data.url || "/"));
   }
 });
 
 function handleNotificationAction(action, data) {
   switch (action) {
-    case 'view-feedback':
+    case "view-feedback":
       clients.openWindow(`/support/track/${data.token}`);
       break;
-    case 'admin-dashboard':
-      clients.openWindow('/admin');
+    case "admin-dashboard":
+      clients.openWindow("/admin");
       break;
     default:
-      clients.openWindow('/');
+      clients.openWindow("/");
   }
 }
