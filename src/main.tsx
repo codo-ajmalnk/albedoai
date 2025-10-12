@@ -12,8 +12,8 @@ inlineCriticalCSS();
 addResourceHints();
 preloadCriticalResources();
 
-// Service Worker Update Handler
-if ("serviceWorker" in navigator) {
+// Service Worker Update Handler (Production Only)
+if ("serviceWorker" in navigator && import.meta.env.PROD) {
   let refreshing = false;
 
   // Reload page when new service worker takes control
@@ -25,17 +25,15 @@ if ("serviceWorker" in navigator) {
   });
 
   // Check for updates every 60 seconds in production
-  if (import.meta.env.PROD) {
-    setInterval(() => {
-      navigator.serviceWorker.getRegistration().then((reg) => {
-        if (reg) {
-          reg.update().catch((err) => {
-            console.log("Service worker update check failed:", err);
-          });
-        }
-      });
-    }, 60000); // Check every minute
-  }
+  setInterval(() => {
+    navigator.serviceWorker.getRegistration().then((reg) => {
+      if (reg) {
+        reg.update().catch((err) => {
+          console.log("Service worker update check failed:", err);
+        });
+      }
+    });
+  }, 60000); // Check every minute
 
   // Check for updates on visibility change (when user returns to tab)
   document.addEventListener("visibilitychange", () => {

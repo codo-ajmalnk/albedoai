@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clear Dev Cache - One Time Setup</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+      .container {
+        background: white;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #333;
+        margin-bottom: 20px;
+      }
+      .status {
+        padding: 15px;
+        margin: 20px 0;
+        border-radius: 8px;
+        font-weight: 500;
+      }
+      .info {
+        background: #e3f2fd;
+        color: #1976d2;
+      }
+      .success {
+        background: #e8f5e9;
+        color: #388e3c;
+      }
+      .warning {
+        background: #fff3e0;
+        color: #f57c00;
+      }
+      button {
+        background: #667eea;
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        margin: 10px 0;
+      }
+      button:hover {
+        background: #5568d3;
+      }
+      .code {
+        background: #2d2d2d;
+        color: #f8f8f2;
+        padding: 15px;
+        border-radius: 6px;
+        margin: 15px 0;
+        overflow-x: auto;
+      }
+      ol {
+        margin: 20px 0;
+        line-height: 2;
+      }
+      li {
+        margin: 10px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🧹 Clear Development Cache (One Time)</h1>
+
+      <div class="status warning" id="status">
+        Click the button below to clear all caches and service workers
+      </div>
+
+      <button onclick="clearEverything()">
+        CLEAR ALL CACHES & SERVICE WORKERS
+      </button>
+
+      <h2>What this does:</h2>
+      <ol>
+        <li>✅ Unregisters all service workers</li>
+        <li>✅ Clears all browser caches</li>
+        <li>✅ Clears localStorage</li>
+        <li>✅ Clears sessionStorage</li>
+        <li>✅ Forces a complete reload</li>
+      </ol>
+
+      <h2>After clicking:</h2>
+      <ol>
+        <li>Wait for the success message</li>
+        <li>The page will redirect to your app</li>
+        <li>Your dev server will work normally with instant updates! 🎉</li>
+      </ol>
+
+      <div class="status info">
+        <strong>Note:</strong> Service workers are now disabled in development
+        mode. This is a one-time cleanup. After this, your changes will appear
+        immediately without needing hard reloads!
+      </div>
+    </div>
+
+    <script>
+      const statusDiv = document.getElementById("status");
+
+      function updateStatus(message, className) {
+        statusDiv.textContent = message;
+        statusDiv.className = "status " + className;
+      }
+
+      async function clearEverything() {
+        try {
+          updateStatus("⏳ Clearing everything...", "info");
+
+          // 1. Unregister ALL service workers
+          if ("serviceWorker" in navigator) {
+            const registrations =
+              await navigator.serviceWorker.getRegistrations();
+            for (let registration of registrations) {
+              await registration.unregister();
+              console.log("Unregistered:", registration);
+            }
+            updateStatus(
+              `✓ Unregistered ${registrations.length} service worker(s)`,
+              "success"
+            );
+          }
+
+          // 2. Clear all caches
+          if ("caches" in window) {
+            const cacheNames = await caches.keys();
+            for (let cacheName of cacheNames) {
+              await caches.delete(cacheName);
+              console.log("Deleted cache:", cacheName);
+            }
+            updateStatus(`✓ Cleared ${cacheNames.length} cache(s)`, "success");
+          }
+
+          // 3. Clear storage
+          localStorage.clear();
+          sessionStorage.clear();
+
+          updateStatus(
+            "✅ SUCCESS! Redirecting to your app in 2 seconds...",
+            "success"
+          );
+
+          // Redirect to root
+          setTimeout(() => {
+            window.location.href = "/";
+          }, 2000);
+        } catch (error) {
+          updateStatus("❌ Error: " + error.message, "warning");
+          console.error("Clear error:", error);
+        }
+      }
+
+      // Auto-detect what needs clearing
+      window.addEventListener("load", async () => {
+        if ("serviceWorker" in navigator) {
+          const registrations =
+            await navigator.serviceWorker.getRegistrations();
+          const cacheNames = "caches" in window ? await caches.keys() : [];
+
+          if (registrations.length > 0 || cacheNames.length > 0) {
+            updateStatus(
+              `Found ${registrations.length} service worker(s) and ${cacheNames.length} cache(s). Click button to clear!`,
+              "warning"
+            );
+          } else {
+            updateStatus(
+              "✓ Already clean! No service workers or caches found.",
+              "success"
+            );
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

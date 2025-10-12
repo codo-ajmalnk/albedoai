@@ -66,9 +66,15 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
 
-    <!-- Service Worker Registration -->
+    <!-- Service Worker Registration (Production Only) -->
     <script>
-      if ("serviceWorker" in navigator) {
+      // Only register service worker in production, not in development
+      const isProduction =
+        window.location.hostname !== "localhost" &&
+        window.location.hostname !== "127.0.0.1" &&
+        !window.location.hostname.includes("192.168");
+
+      if ("serviceWorker" in navigator && isProduction) {
         window.addEventListener("load", () => {
           navigator.serviceWorker
             .register("/sw.js", { updateViaCache: "none" })
@@ -102,6 +108,20 @@
               console.log("SW registration failed: ", registrationError);
             });
         });
+      } else if (!isProduction) {
+        console.log(
+          "Development mode: Service worker disabled for instant updates"
+        );
+
+        // Unregister any existing service workers from previous sessions
+        if ("serviceWorker" in navigator) {
+          navigator.serviceWorker.getRegistrations().then((registrations) => {
+            registrations.forEach((registration) => {
+              registration.unregister();
+              console.log("Unregistered service worker for development");
+            });
+          });
+        }
       }
     </script>
   </body>

@@ -370,13 +370,13 @@ export function AppSidebar() {
                               tooltip={collapsed ? category.name : undefined}
                               className="group"
                             >
-                              <BookOpen
+                              {/* <BookOpen
                                 className={cn(
                                   "h-4 w-4 flex-shrink-0",
                                   "text-muted-foreground group-hover:text-foreground"
                                 )}
                                 style={{ color: category.color || undefined }}
-                              />
+                              /> */}
                               {!collapsed && (
                                 <span className="truncate font-medium text-sm">
                                   {category.name}
