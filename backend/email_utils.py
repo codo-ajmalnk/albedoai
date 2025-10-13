@@ -202,6 +202,7 @@ def send_feedback_response_email(
     subject: str,
     admin_response: str,
     token: str,
+    status: str,
 ) -> bool:
     """
     Send an email notification when admin responds to feedback.
@@ -212,7 +213,7 @@ def send_feedback_response_email(
         subject: Subject of the original feedback
         admin_response: Admin's response
         token: Tracking token for the feedback
-
+        status: Status of the feedback
     Returns:
         True if email was sent successfully, False otherwise
     """
@@ -237,6 +238,7 @@ Hello {recipient_name or 'there'},
 Our support team has responded to your request!
 
 Subject: {subject}
+Status: {status.capitalize().replace("_", " ")}
 Tracking ID: {token}
 
 Support Team Response:
@@ -315,6 +317,7 @@ Albedo Support Team
         </p>
         
         <p><strong>Subject:</strong> {subject}<br>
+        <strong>Status:</strong> {status.capitalize().replace("_", " ")}<br>
         <strong>Tracking ID:</strong> {token}</p>
         
         <p>If you have any follow-up questions, please reply to this ticket or contact us at 
@@ -359,7 +362,7 @@ def send_user_creation_email(
         recipient_email: New user's email address
         username: Username for login
         password: Temporary password
-        role: User's role (admin, moderator, user)
+        role: User's role (admin)
 
     Returns:
         True if email was sent successfully, False otherwise
@@ -392,7 +395,7 @@ Account Details:
 ----------------
 Username: {username}
 Password: {password}
-Role: {role.capitalize()}
+Role: Administrator
 
 Login URL: {login_url}
 
@@ -404,7 +407,7 @@ Security Reminder:
 Getting Started:
 1. Visit the login page using the link above
 2. Sign in with your username and password
-3. You'll have access to the admin dashboard based on your role
+3. You'll have full access to the admin dashboard
 
 If you have any questions or need assistance, please don't hesitate to reach out to our support team.
 
@@ -533,7 +536,7 @@ This is an automated message from Albedo Support System.
         <ol>
             <li>Click the button above to go to the login page</li>
             <li>Sign in with your username and password</li>
-            <li>You'll have access to features based on your role</li>
+            <li>You'll have full access to all admin features</li>
         </ol>
         
         <p>If you have any questions or need assistance, please contact our support team.</p>
@@ -567,4 +570,277 @@ This is an automated message from Albedo Support System.
     except Exception as e:
         print(
             f"[EMAIL ERROR] Failed to send account creation email to {recipient_email}: {str(e)}")
+        return False
+
+
+def send_feedback_status_update_email(
+    recipient_email: str,
+    recipient_name: str,
+    subject: str,
+    status: str,
+    token: str,
+) -> bool:
+    """
+    Send an email notification when feedback status is updated.
+    """
+    settings = get_settings()
+    if status == "resolved":
+        status_message = "Your request has been resolved. Thank you for your feedback! Visit the link below to view the full conversation."
+    elif status == "in_progress":
+        status_message = "Our support team is working on your request. We will get back to you soon. Visit the link below to view the full conversation."
+    elif status == "closed":
+        status_message = "Your request has been closed. Thank you for your feedback! Visit the link below to view the full conversation."
+    else:
+        status_message = "Your request has been updated. Thank you for your feedback! Visit the link below to view the full conversation."
+
+    if not settings.enable_email or not settings.smtp_username:
+        print(
+            f"[EMAIL DISABLED] Would send status update email to {recipient_email}")
+        return True
+
+    try:
+        tracking_url = f"{settings.frontend_url}/support/track/{token}"
+
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = f"Status Update - {subject}"
+        msg["From"] = f"{settings.smtp_from_name} <{settings.smtp_from_email}>"
+        msg["To"] = recipient_email
+
+        text_content = f"""
+        Hello {recipient_name or 'there'},
+
+        Our support team has updated the status of your request!
+
+        Subject: {subject}
+        Tracking ID: {token}
+
+        Status Update:
+        {status.capitalize().replace("_", " ")}
+
+        View Full Conversation:
+        {tracking_url}
+
+        If you have any follow-up questions, please reply to this ticket or contact us at support@albedoedu.com.
+
+        Best regards,
+        Albedo Support Team
+        """.strip()
+
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body {{
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    line-height: 1.6;
+                    color: #333;
+                    max-width: 600px;
+                    margin: 0 auto;
+                    padding: 20px;
+                }}
+                .header {{
+                    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                    color: white;
+                    padding: 30px;
+                    border-radius: 8px 8px 0 0;
+                    text-align: center;
+                }}
+                .content {{
+                    background: #f8f9fa;
+                    padding: 30px;
+                    border-radius: 0 0 8px 8px;
+                }}
+                .response-box {{
+                    background: white;
+                    padding: 20px;
+                    border-radius: 6px;
+                    margin: 20px 0;
+                    border-left: 4px solid #10b981;
+                }}
+                .button {{
+                    display: inline-block;
+                    background: #10b981;
+                    color: white;
+                    padding: 12px 30px;
+                    text-decoration: none;
+                    border-radius: 6px;
+                    margin: 20px 0;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1 style="margin: 0; font-size: 28px;">Status Update</h1>
+                <p style="margin: 10px 0 0 0; opacity: 0.9;">Our support team has updated the status of your request!</p>
+            </div>
+            <div class="content">
+                <p>Hello {recipient_name or 'there'},</p>
+                
+                <p>Our support team has updated the status of your request!</p>
+                
+                <div class="response-box">
+                    <h3 style="margin-top: 0;">Status Update</h3>
+                    <p style="white-space: pre-wrap;"><strong>Status:</strong> {status.capitalize().replace("_", " ")}</p>
+                    <p style="white-space: pre-wrap;">{status_message}</p>
+                </div>
+                
+                <p style="text-align: center;">
+                    <a href="{tracking_url}" class="button">
+                        View Full Conversation
+                    </a>
+                </p>
+                
+                <p><strong>Subject:</strong> {subject}<br>
+                    <strong>Tracking ID:</strong> {token}</p>
+                
+                <p>If you have any follow-up questions, please reply to this ticket or contact us at 
+                <a href="mailto:support@albedoedu.com">support@albedoedu.com</a>.</p>
+                
+                <p>Best regards,<br>
+                <strong>Albedo Support Team</strong></p>
+            </div>
+        </body>
+        </html>
+        """.strip()
+
+        part1 = MIMEText(text_content, "plain")
+        part2 = MIMEText(html_content, "html")
+        msg.attach(part1)
+        msg.attach(part2)
+
+        with smtplib.SMTP(settings.smtp_host, settings.smtp_port) as server:
+            server.starttls()
+            server.login(settings.smtp_username, settings.smtp_password)
+            server.send_message(msg)
+
+        print(f"[EMAIL SENT] Status update email sent to {recipient_email}")
+        return True
+
+    except Exception as e:
+        print(
+            f"[EMAIL ERROR] Failed to send status update email to {recipient_email}: {str(e)}")
+        return False
+
+
+def send_support_request_notification_email(
+    admin_email: str,
+    support_request
+) -> bool:
+    """
+    Send notification email to admin when a new support request is submitted.
+
+    Args:
+        admin_email: Admin's email address
+        support_request: Support request object
+
+    Returns:
+        True if email was sent successfully, False otherwise
+    """
+    settings = get_settings()
+
+    if not settings.enable_email:
+        print("Email notifications are disabled")
+        return False
+
+    try:
+        # Create message
+        msg = MIMEMultipart()
+        msg['From'] = f"{settings.smtp_from_name} <{settings.smtp_from_email}>"
+        msg['To'] = admin_email
+        msg['Subject'] = "New Support Request - AlbedoAI"
+
+        # Email body
+        body = f"""
+Hello Admin,
+
+A new support request has been submitted:
+
+From: {support_request.name or support_request.email}
+Email: {support_request.email}
+Subject: {support_request.subject}
+Message: {support_request.message}
+
+You can view and respond to this request in the admin dashboard.
+
+Best regards,
+AlbedoAI Support System
+        """
+
+        msg.attach(MIMEText(body, 'plain'))
+
+        # Send email
+        with smtplib.SMTP(settings.smtp_host, settings.smtp_port) as server:
+            server.starttls()
+            server.login(settings.smtp_username, settings.smtp_password)
+            server.send_message(msg)
+
+        print(
+            f"[EMAIL SENT] Support request notification sent to {admin_email}")
+        return True
+
+    except Exception as e:
+        print(
+            f"[EMAIL ERROR] Failed to send support request notification to {admin_email}: {str(e)}")
+        return False
+
+
+def send_user_creation_notification_email(
+    admin_email: str,
+    new_user
+) -> bool:
+    """
+    Send notification email to admin when a new user is created.
+
+    Args:
+        admin_email: Admin's email address
+        new_user: New user object
+
+    Returns:
+        True if email was sent successfully, False otherwise
+    """
+    settings = get_settings()
+
+    if not settings.enable_email:
+        print("Email notifications are disabled")
+        return False
+
+    try:
+        # Create message
+        msg = MIMEMultipart()
+        msg['From'] = f"{settings.smtp_from_name} <{settings.smtp_from_email}>"
+        msg['To'] = admin_email
+        msg['Subject'] = "New User Created - AlbedoAI"
+
+        # Email body
+        body = f"""
+Hello Admin,
+
+A new user has been created:
+
+Username: {new_user.username}
+Email: {new_user.email}
+Role: {new_user.role}
+Status: {new_user.status}
+
+You can manage this user in the admin dashboard.
+
+Best regards,
+AlbedoAI Support System
+        """
+
+        msg.attach(MIMEText(body, 'plain'))
+
+        # Send email
+        with smtplib.SMTP(settings.smtp_host, settings.smtp_port) as server:
+            server.starttls()
+            server.login(settings.smtp_username, settings.smtp_password)
+            server.send_message(msg)
+
+        print(f"[EMAIL SENT] User creation notification sent to {admin_email}")
+        return True
+
+    except Exception as e:
+        print(
+            f"[EMAIL ERROR] Failed to send user creation notification to {admin_email}: {str(e)}")
         return False

@@ -49,7 +49,7 @@ const defaultCategories = [
   { value: "bug", label: "Bug Report" },
 ];
 
-export default function Support() {
+export default function SupportRequest() {
   const [formData, setFormData] = useState({
     email: "",
     name: "",
@@ -123,7 +123,7 @@ export default function Support() {
 
     try {
       const baseUrl = import.meta.env.VITE_API_URL || "";
-      const response = await fetch(`${baseUrl}/api/feedback/submit`, {
+      const response = await fetch(`${baseUrl}/api/support-request/submit`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

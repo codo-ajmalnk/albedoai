@@ -17,15 +17,15 @@ class Settings(BaseSettings):
     )
 
     cors_origins: List[str] = [
-        os.getenv("CORS_ORIGIN", "http://localhost:8080"),
-        os.getenv("CORS_ORIGIN_ALT", "http://127.0.0.1:8080"),
-        "*"
+        os.getenv("CORS_ORIGIN"),
+        os.getenv("CORS_ORIGIN_ALT"),
+        "*",
     ]
 
     # JWT settings
-    jwt_secret_key: str = os.getenv(
-        "JWT_SECRET_KEY", "your-secret-key-change-in-production")
-    jwt_algorithm: str = os.getenv("JWT_ALGORITHM", "HS256")
+    # jwt_secret_key: str = os.getenv(
+    #     "JWT_SECRET_KEY", "your-secret-key-change-in-production")
+    # jwt_algorithm: str = os.getenv("JWT_ALGORITHM", "HS256")
     jwt_access_token_expire_minutes: int = int(
         os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))  # 24 hours
 

@@ -59,7 +59,7 @@ interface FeedbackItem {
   updated_at: string;
 }
 
-export default function Feedback() {
+export default function SupportRequestAdmin() {
   const [feedback, setFeedback] = useState<FeedbackItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedFeedback, setSelectedFeedback] = useState<FeedbackItem | null>(
@@ -69,6 +69,7 @@ export default function Feedback() {
   const [replyMessage, setReplyMessage] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isReplying, setIsReplying] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -79,7 +80,7 @@ export default function Feedback() {
     try {
       setLoading(true);
       const baseUrl = import.meta.env.VITE_API_URL || "";
-      const response = await fetch(`${baseUrl}/api/feedback`);
+      const response = await fetch(`${baseUrl}/api/support-request`);
 
       if (response.ok) {
         const data = await response.json();
@@ -125,15 +126,18 @@ export default function Feedback() {
   const handleStatusChange = async (feedbackId: number, newStatus: string) => {
     try {
       const baseUrl = import.meta.env.VITE_API_URL || "";
-      const response = await fetch(`${baseUrl}/api/feedback/${feedbackId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          status: newStatus,
-        }),
-      });
+      const response = await fetch(
+        `${baseUrl}/api/support-request/${feedbackId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            status: newStatus,
+          }),
+        }
+      );
 
       if (response.ok) {
         const updatedFeedback = await response.json();
@@ -142,7 +146,10 @@ export default function Feedback() {
         );
         toast({
           title: "Status updated",
-          description: `Feedback status changed to ${newStatus}`,
+          description: `Feedback status changed to ${
+            newStatus.charAt(0).toUpperCase() +
+            newStatus.slice(1).replace(/_/g, " ")
+          }`,
         });
       } else {
         throw new Error("Failed to update status");
@@ -161,9 +168,10 @@ export default function Feedback() {
     if (!selectedFeedback || !replyMessage.trim()) return;
 
     try {
+      setIsReplying(true);
       const baseUrl = import.meta.env.VITE_API_URL || "";
       const response = await fetch(
-        `${baseUrl}/api/feedback/${selectedFeedback.id}`,
+        `${baseUrl}/api/support-request/${selectedFeedback.id}`,
         {
           method: "PUT",
           headers: {
@@ -200,6 +208,8 @@ export default function Feedback() {
         description: "Failed to send reply. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsReplying(false);
     }
   };
 
@@ -217,9 +227,9 @@ export default function Feedback() {
     <div className="space-y-8">
       {/* Header - Add padding-top on mobile to avoid sidebar button overlap */}
       <div className="pt-12 lg:pt-0">
-        <h1 className="text-3xl font-bold">Feedback Management</h1>
+        <h1 className="text-3xl font-bold">Support Request Management</h1>
         <p className="text-foreground-muted">
-          View and respond to user feedback and support requests
+          View and respond to support requests
         </p>
       </div>
 
@@ -256,7 +266,7 @@ export default function Feedback() {
         <CardHeader>
           <CardTitle>Support Requests</CardTitle>
           <CardDescription>
-            All feedback and support requests from users
+            All support requests from users
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -280,7 +290,7 @@ export default function Feedback() {
                       colSpan={5}
                       className="text-center py-8 text-muted-foreground"
                     >
-                      No feedback found
+                      No support requests found
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -441,10 +451,22 @@ export default function Feedback() {
             >
               Cancel
             </Button>
-            <Button onClick={handleReply} disabled={!replyMessage.trim()}>
-              {selectedFeedback?.admin_response
-                ? "Update Response"
-                : "Send Response"}
+            <Button
+              onClick={handleReply}
+              disabled={!replyMessage.trim() || isReplying}
+            >
+              {isReplying ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  {selectedFeedback?.admin_response
+                    ? "Update Response"
+                    : "Send Response"}
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

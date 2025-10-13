@@ -156,7 +156,7 @@ export default function ArticleView() {
             <div key={index} className="space-y-6">
               {/* Block Title */}
               {block.title && (
-                <h2 className=" text-xl mt-12 font-bold tracking-tight">
+                <h2 className="text-2xl mt-12 font-semibold leading-none tracking-tight">
                   {block.title}
                 </h2>
               )}

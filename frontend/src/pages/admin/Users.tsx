@@ -80,8 +80,6 @@ interface User {
 
 const roleColors = {
   admin: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-  moderator: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-  user: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
 };
 
 const statusColors = {
@@ -98,7 +96,6 @@ export default function Users() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -107,7 +104,7 @@ export default function Users() {
     username: "",
     email: "",
     password: "",
-    role: "user",
+    role: "admin",
     status: "active",
   });
   const { toast } = useToast();
@@ -171,7 +168,7 @@ export default function Users() {
         username: "",
         email: "",
         password: "",
-        role: "user",
+        role: "admin",
         status: "active",
       });
     }
@@ -185,7 +182,7 @@ export default function Users() {
       username: "",
       email: "",
       password: "",
-      role: "user",
+      role: "admin",
       status: "active",
     });
   };
@@ -334,11 +331,10 @@ export default function Users() {
     const matchesSearch =
       user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesRole = roleFilter === "all" || user.role === roleFilter;
     const matchesStatus =
       statusFilter === "all" || user.status === statusFilter;
 
-    return matchesSearch && matchesRole && matchesStatus;
+    return matchesSearch && matchesStatus;
   });
 
   const getStatusIcon = (status: string) => {
@@ -361,7 +357,7 @@ export default function Users() {
         <div>
           <h1 className="text-3xl font-bold">User Management</h1>
           <p className="text-muted-foreground">
-            Manage user accounts, roles, and permissions
+            Manage admin user accounts and permissions
           </p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -382,7 +378,7 @@ export default function Users() {
               <DialogDescription>
                 {editingUser
                   ? "Update user information below."
-                  : "Create a new user account with role and status."}
+                  : "Create a new admin user account."}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
@@ -440,22 +436,13 @@ export default function Users() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="role">Role *</Label>
-                  <Select
-                    value={formData.role}
-                    onValueChange={(value) =>
-                      setFormData((prev) => ({ ...prev, role: value }))
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="user">User</SelectItem>
-                      <SelectItem value="moderator">Moderator</SelectItem>
-                      <SelectItem value="admin">Admin</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="role">Role</Label>
+                  <div className="flex items-center space-x-2">
+                    <Badge className={roleColors.admin}>Admin</Badge>
+                    <span className="text-sm text-muted-foreground">
+                      All users are administrators
+                    </span>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -552,23 +539,6 @@ export default function Users() {
                 </p>
               </CardContent>
             </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Moderators
-                </CardTitle>
-                <Shield className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {users.filter((u) => u.role === "moderator").length}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Content moderators
-                </p>
-              </CardContent>
-            </Card>
           </>
         )}
       </div>
@@ -590,17 +560,6 @@ export default function Users() {
                 className="pl-10"
               />
             </div>
-            <Select value={roleFilter} onValueChange={setRoleFilter}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Filter by role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Roles</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="moderator">Moderator</SelectItem>
-                <SelectItem value="user">User</SelectItem>
-              </SelectContent>
-            </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Filter by status" />

@@ -86,7 +86,7 @@ export function optimizeBundleSplitting() {
   // Code splitting for routes
   const routes = {
     docs: () => import('@/pages/DocsIndex'),
-    support: () => import('@/pages/Support'),
+    support: () => import('@/pages/SupportRequest'),
     admin: () => import('@/pages/admin/AdminDashboard'),
   };
   

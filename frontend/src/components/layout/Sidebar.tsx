@@ -28,6 +28,8 @@ import {
   ChevronRight,
   LogOut,
   User,
+  Heart,
+  Bell,
 } from "lucide-react";
 import {
   Collapsible,
@@ -40,6 +42,7 @@ import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SearchModal } from "@/components/SearchModal";
 import { useAuth } from "@/contexts/AuthContext";
+import { NotificationBell } from "@/components/NotificationBell";
 
 // Custom hook to check if device is mobile or tablet (for sidebar purposes)
 function useIsMobileOrTablet() {
@@ -89,14 +92,24 @@ const adminItems = [
     icon: FileText,
   },
   {
+    title: "Support Requests",
+    url: "/admin/support-request",
+    icon: MessageSquare,
+  },
+  {
     title: "Feedback",
     url: "/admin/feedback",
-    icon: MessageSquare,
+    icon: Heart,
   },
   {
     title: "Users",
     url: "/admin/users",
     icon: Users,
+  },
+  {
+    title: "Notifications",
+    url: "/admin/notifications",
+    icon: Bell,
   },
   {
     title: "Settings",
@@ -431,7 +444,10 @@ export function AppSidebar() {
                   collapsed && "opacity-0 -mt-2"
                 )}
               >
-                Administration
+                <div className="flex items-center justify-between">
+                  <span>Administration</span>
+                  {!collapsed && <NotificationBell />}
+                </div>
               </SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu className="space-y-1">
@@ -510,7 +526,7 @@ export function AppSidebar() {
               {!collapsed && <span className="ml-2">Search</span>}
             </Button>
 
-            {/* Support link */}
+            {/* Support Request link */}
             <Button
               variant="ghost"
               size="sm"
@@ -520,9 +536,33 @@ export function AppSidebar() {
                 collapsed && "w-9 p-0 justify-center"
               )}
             >
-              <Link to="/support" className="flex items-center">
+              <Link
+                to="/support"
+                onClick={handleNavClick}
+                className="flex items-center"
+              >
                 <MessageCircle className="h-4 w-4" />
-                {!collapsed && <span className="ml-2">Support</span>}
+                {!collapsed && <span className="ml-2">Support Request</span>}
+              </Link>
+            </Button>
+
+            {/* Feedback link */}
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className={cn(
+                "h-9 w-full justify-start",
+                collapsed && "w-9 p-0 justify-center"
+              )}
+            >
+              <Link
+                to="/feedback"
+                onClick={handleNavClick}
+                className="flex items-center"
+              >
+                <Heart className="h-4 w-4" />
+                {!collapsed && <span className="ml-2">Feedback</span>}
               </Link>
             </Button>
           </SidebarFooter>

@@ -1,147 +1,112 @@
 """
-Feedback and support request endpoints.
+Feedback endpoints for collecting user feedback about the site experience.
+This is separate from the support request system.
 """
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, status, Depends
+from sqlalchemy.orm import Session
 from typing import List
-import uuid
-from backend.models import Feedback, Category
-from backend.schemas import (
-    FeedbackCreate,
-    FeedbackResponse,
-    FeedbackUpdate
-)
+
+from backend.models import Feedback
+from backend.schemas import FeedbackCreate, FeedbackResponse, CurrentUser
 from backend.database import SessionLocal
-from backend.email_utils import (
-    send_feedback_confirmation_email,
-    send_feedback_response_email
-)
+from backend.routers.auth import require_admin
+
+router = APIRouter(prefix="/api/feedback",
+                   tags=["Feedback"])
 
 
-router = APIRouter(prefix="/api/feedback", tags=["Feedback"])
+def get_db():
+    """Get database session."""
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
-@router.post("/submit")
-def submit_feedback(payload: FeedbackCreate):
+@router.post("", response_model=FeedbackResponse, status_code=201)
+def create_feedback(
+    payload: FeedbackCreate,
+    db: Session = Depends(get_db)
+):
     """
-    Submit a support/feedback request.
-    Returns the feedback object with a unique tracking token.
+    Create a new user experience feedback entry.
+    This is a public endpoint that doesn't require authentication.
     """
-    with SessionLocal() as db:
-        # Generate unique token for tracking
-        tracking_token = str(uuid.uuid4())
-
-        # Parse category ID if provided
-        category_id = None
-        if payload.categoryId:
-            try:
-                category_id = int(payload.categoryId)
-                # Verify category exists
-                category = db.query(Category).filter(
-                    Category.id == category_id).first()
-                if not category:
-                    category_id = None
-            except (ValueError, TypeError):
-                category_id = None
-
-        # Create feedback record
-        feedback = Feedback(
-            email=payload.email,
-            name=payload.name,
-            subject=payload.subject,
-            message=payload.message,
-            category_id=category_id,
-            token=tracking_token,
-            status="pending"
+    # Validate rating if provided
+    if payload.rating is not None and (payload.rating < 1 or payload.rating > 5):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Rating must be between 1 and 5"
         )
 
-        db.add(feedback)
-        db.commit()
-        db.refresh(feedback)
+    # Create new feedback entry
+    new_feedback = Feedback(
+        email=payload.email,
+        name=payload.name,
+        message=payload.message,
+        rating=payload.rating
+    )
 
-        # Send confirmation email to user
-        send_feedback_confirmation_email(
-            recipient_email=feedback.email,
-            recipient_name=feedback.name or "",
-            subject=feedback.subject,
-            message=feedback.message,
-            token=feedback.token,
-        )
+    db.add(new_feedback)
+    db.commit()
+    db.refresh(new_feedback)
 
-        return {
-            "success": True,
-            "feedback": FeedbackResponse.from_orm(feedback)
-        }
-
-
-@router.get("/{token}")
-def get_feedback_by_token(token: str):
-    """Get feedback details by tracking token."""
-    with SessionLocal() as db:
-        feedback = db.query(Feedback).filter(Feedback.token == token).first()
-        if not feedback:
-            raise HTTPException(status_code=404, detail="Feedback not found")
-
-        return FeedbackResponse.from_orm(feedback)
+    return FeedbackResponse.from_orm(new_feedback)
 
 
 @router.get("", response_model=List[FeedbackResponse])
-def get_all_feedback(status: str = None, limit: int = 100):
-    """Get all feedback with optional status filter."""
-    with SessionLocal() as db:
-        query = db.query(Feedback)
+def get_all_feedback(
+    db: Session = Depends(get_db),
+    current_user: CurrentUser = Depends(require_admin)
+):
+    """
+    Get all user experience feedback entries.
+    Requires admin authentication.
+    """
+    feedback_entries = db.query(Feedback).order_by(
+        Feedback.created_at.desc()
+    ).all()
 
-        if status:
-            query = query.filter(Feedback.status == status)
-
-        feedbacks = query.order_by(
-            Feedback.created_at.desc()).limit(limit).all()
-        return [FeedbackResponse.from_orm(f) for f in feedbacks]
-
-
-@router.put("/{feedback_id}")
-def update_feedback(feedback_id: int, payload: FeedbackUpdate):
-    """Update feedback status or admin response."""
-    with SessionLocal() as db:
-        feedback = db.query(Feedback).filter(
-            Feedback.id == feedback_id).first()
-        if not feedback:
-            raise HTTPException(status_code=404, detail="Feedback not found")
-
-        # Track if admin_response was updated
-        send_notification = False
-        if payload.admin_response is not None and payload.admin_response.strip():
-            feedback.admin_response = payload.admin_response
-            send_notification = True
-
-        if payload.status is not None:
-            feedback.status = payload.status
-
-        db.commit()
-        db.refresh(feedback)
-
-        # Send email notification if admin responded
-        if send_notification:
-            send_feedback_response_email(
-                recipient_email=feedback.email,
-                recipient_name=feedback.name or "",
-                subject=feedback.subject,
-                admin_response=feedback.admin_response,
-                token=feedback.token,
-            )
-
-        return FeedbackResponse.from_orm(feedback)
+    return [FeedbackResponse.from_orm(entry) for entry in feedback_entries]
 
 
-@router.delete("/{feedback_id}", status_code=204)
-def delete_feedback(feedback_id: int):
-    """Delete a feedback entry."""
-    with SessionLocal() as db:
-        feedback = db.query(Feedback).filter(
-            Feedback.id == feedback_id).first()
-        if not feedback:
-            raise HTTPException(status_code=404, detail="Feedback not found")
+@router.get("/stats")
+def get_feedback_stats(
+    db: Session = Depends(get_db),
+    current_user: CurrentUser = Depends(require_admin)
+):
+    """
+    Get statistics about user experience feedback.
+    Requires admin authentication.
+    """
+    total_feedback = db.query(Feedback).count()
 
-        db.delete(feedback)
-        db.commit()
+    # Calculate average rating
+    feedback_with_ratings = db.query(Feedback).filter(
+        Feedback.rating.isnot(None)
+    ).all()
 
-        return None
+    if feedback_with_ratings:
+        average_rating = sum(
+            f.rating for f in feedback_with_ratings) / len(feedback_with_ratings)
+        rating_count = len(feedback_with_ratings)
+    else:
+        average_rating = 0
+        rating_count = 0
+
+    # Rating distribution
+    rating_distribution = {}
+    for i in range(1, 6):
+        count = db.query(Feedback).filter(
+            Feedback.rating == i
+        ).count()
+        rating_distribution[str(i)] = count
+
+    return {
+        "total_feedback": total_feedback,
+        "average_rating": round(average_rating, 2) if average_rating > 0 else None,
+        "rating_count": rating_count,
+        "rating_distribution": rating_distribution,
+        "feedback_without_rating": total_feedback - rating_count
+    }

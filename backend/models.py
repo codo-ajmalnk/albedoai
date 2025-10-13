@@ -1,5 +1,5 @@
 from sqlalchemy.orm import declarative_base, relationship, Mapped, mapped_column
-from sqlalchemy import Integer, String, Text, ForeignKey, JSON, DateTime
+from sqlalchemy import Integer, String, Text, ForeignKey, JSON, DateTime, Boolean
 from sqlalchemy.sql import func
 from typing import Optional, List
 from datetime import datetime
@@ -23,6 +23,12 @@ class User(Base):
         DateTime, server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    # Relationships
+    notifications: Mapped[List["Notification"]] = relationship(
+        "Notification", back_populates="user")
+    notification_settings: Mapped[Optional["UserNotificationSettings"]] = relationship(
+        "UserNotificationSettings", back_populates="user", uselist=False)
 
 
 class Category(Base):
@@ -70,8 +76,8 @@ class Article(Base):
     category = relationship("Category", back_populates="articles")
 
 
-class Feedback(Base):
-    __tablename__ = "feedback"
+class SupportRequest(Base):
+    __tablename__ = "support_requests"
 
     id: Mapped[int] = mapped_column(
         Integer, primary_key=True, autoincrement=True)
@@ -92,3 +98,96 @@ class Feedback(Base):
         DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
 
     category = relationship("Category")
+
+
+class Feedback(Base):
+    __tablename__ = "feedback"
+
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, autoincrement=True)
+    email: Mapped[str] = mapped_column(String(255), nullable=False)
+    name: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    message: Mapped[str] = mapped_column(Text, nullable=False)
+    rating: Mapped[Optional[int]] = mapped_column(
+        Integer, nullable=True)  # 1-5 star rating
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+
+
+class Notification(Base):
+    """Model for user notifications."""
+    __tablename__ = "notifications"
+
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id"), nullable=False)
+    # 'support_request', 'user_created', etc.
+    type: Mapped[str] = mapped_column(String(50), nullable=False)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    message: Mapped[str] = mapped_column(Text, nullable=False)
+    is_read: Mapped[bool] = mapped_column(
+        Boolean, default=False, nullable=False)
+    notification_data: Mapped[Optional[str]] = mapped_column(
+        JSON, nullable=True)  # Additional data
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), nullable=False)
+
+    # Relationship
+    user: Mapped["User"] = relationship("User", back_populates="notifications")
+
+
+class UserNotificationSettings(Base):
+    """Model for user notification preferences."""
+    __tablename__ = "user_notification_settings"
+
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id"), nullable=False, unique=True)
+
+    # Email notification preferences
+    email_support_requests: Mapped[bool] = mapped_column(
+        Boolean, default=True, nullable=False)
+    email_user_created: Mapped[bool] = mapped_column(
+        Boolean, default=True, nullable=False)
+
+    # System alert preferences
+    system_support_requests: Mapped[bool] = mapped_column(
+        Boolean, default=True, nullable=False)
+    system_user_created: Mapped[bool] = mapped_column(
+        Boolean, default=True, nullable=False)
+
+    # Browser notification preferences
+    browser_support_requests: Mapped[bool] = mapped_column(
+        Boolean, default=True, nullable=False)
+    browser_user_created: Mapped[bool] = mapped_column(
+        Boolean, default=True, nullable=False)
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    # Relationship
+    user: Mapped["User"] = relationship(
+        "User", back_populates="notification_settings")
+
+# class Announcement(Base):
+#     __tablename__ = "announcements"
+
+#     id: Mapped[int] = mapped_column(
+#         Integer, primary_key=True, autoincrement=True)
+#     title: Mapped[str] = mapped_column(String(255), nullable=False)
+#     message: Mapped[str] = mapped_column(Text, nullable=False)
+#     created_at: Mapped[datetime] = mapped_column(
+#         DateTime, server_default=func.now(), nullable=False)
+#     expires_by: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+#     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+#     updated_at: Mapped[datetime] = mapped_column(
+#         DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+
+#     created_by: Mapped[int] = mapped_column(
+#         Integer, ForeignKey("users.id"), nullable=False)

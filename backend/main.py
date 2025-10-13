@@ -13,7 +13,7 @@ from backend.database import engine, SessionLocal
 from backend.settings import get_settings
 
 # Import routers
-from backend.routers import search, categories, articles, upload, feedback, users, auth
+from backend.routers import search, categories, articles, upload, support_request, users, auth, feedback, notifications
 
 
 # Create tables if not exist
@@ -53,7 +53,9 @@ app.include_router(search.router)
 app.include_router(categories.router)
 app.include_router(articles.router)
 app.include_router(upload.router)
+app.include_router(support_request.router)
 app.include_router(feedback.router)
+app.include_router(notifications.router)
 app.include_router(users.router)
 
 

@@ -51,7 +51,7 @@ export default function FeedbackTrack() {
   const fetchFeedback = async (token: string) => {
     try {
       const baseUrl = import.meta.env.VITE_API_URL || "";
-      const response = await fetch(`${baseUrl}/api/feedback/${token}`);
+      const response = await fetch(`${baseUrl}/api/support-request/${token}`);
 
       if (response.ok) {
         const data = await response.json();

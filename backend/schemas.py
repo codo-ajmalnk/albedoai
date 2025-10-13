@@ -42,7 +42,7 @@ class UserCreate(BaseModel):
     username: str
     email: str
     password: str
-    role: Literal["admin", "moderator", "user"] = "user"
+    role: Literal["admin"] = "admin"
     status: Literal["active", "inactive"] = "active"
 
 
@@ -64,7 +64,7 @@ class UserUpdate(BaseModel):
     """Schema for updating users."""
     email: Optional[str] = None
     password: Optional[str] = None
-    role: Optional[Literal["admin", "moderator", "user"]] = None
+    role: Optional[Literal["admin"]] = None
     status: Optional[Literal["active", "inactive"]] = None
 
 
@@ -153,9 +153,9 @@ class ArticleResponse(BaseModel):
         from_attributes = True
 
 
-# Feedback-related schemas
-class FeedbackCreate(BaseModel):
-    """Schema for creating feedback/support request."""
+# Support Request schemas
+class SupportRequestCreate(BaseModel):
+    """Schema for creating support request."""
     email: str
     name: Optional[str] = None
     subject: str
@@ -163,8 +163,8 @@ class FeedbackCreate(BaseModel):
     categoryId: Optional[str] = None
 
 
-class FeedbackResponse(BaseModel):
-    """Schema for feedback responses."""
+class SupportRequestResponse(BaseModel):
+    """Schema for support request responses."""
     id: int
     email: str
     name: Optional[str] = None
@@ -181,10 +181,33 @@ class FeedbackResponse(BaseModel):
         from_attributes = True
 
 
-class FeedbackUpdate(BaseModel):
-    """Schema for updating feedback."""
+class SupportRequestUpdate(BaseModel):
+    """Schema for updating support request."""
     status: Optional[str] = None
     admin_response: Optional[str] = None
+
+
+# Feedback schemas
+class FeedbackCreate(BaseModel):
+    """Schema for creating feedback."""
+    email: str
+    name: Optional[str] = None
+    message: str
+    rating: Optional[int] = None  # 1-5 star rating
+
+
+class FeedbackResponse(BaseModel):
+    """Schema for feedback responses."""
+    id: int
+    email: str
+    name: Optional[str] = None
+    message: str
+    rating: Optional[int] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
 
 
 # Authentication schemas
@@ -208,3 +231,72 @@ class CurrentUser(BaseModel):
     email: str
     role: str
     status: str
+
+
+# Notification schemas
+class NotificationResponse(BaseModel):
+    """Schema for notification responses."""
+    id: int
+    user_id: int
+    type: str
+    title: str
+    message: str
+    is_read: bool
+    notification_data: Optional[dict] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class NotificationCreate(BaseModel):
+    """Schema for creating notifications."""
+    user_id: int
+    type: str
+    title: str
+    message: str
+    notification_data: Optional[dict] = None
+
+
+class NotificationUpdate(BaseModel):
+    """Schema for updating notifications."""
+    is_read: Optional[bool] = None
+
+
+# User Notification Settings schemas
+class UserNotificationSettingsResponse(BaseModel):
+    """Schema for user notification settings responses."""
+    id: int
+    user_id: int
+    email_support_requests: bool
+    email_user_created: bool
+    system_support_requests: bool
+    system_user_created: bool
+    browser_support_requests: bool
+    browser_user_created: bool
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class UserNotificationSettingsUpdate(BaseModel):
+    """Schema for updating user notification settings."""
+    email_support_requests: Optional[bool] = None
+    email_user_created: Optional[bool] = None
+    system_support_requests: Optional[bool] = None
+    system_user_created: Optional[bool] = None
+    browser_support_requests: Optional[bool] = None
+    browser_user_created: Optional[bool] = None
+
+
+class UserNotificationSettingsCreate(BaseModel):
+    """Schema for creating user notification settings."""
+    user_id: int
+    email_support_requests: bool = True
+    email_user_created: bool = True
+    system_support_requests: bool = True
+    system_user_created: bool = True
+    browser_support_requests: bool = True
+    browser_user_created: bool = True

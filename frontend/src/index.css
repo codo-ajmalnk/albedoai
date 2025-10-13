@@ -202,6 +202,36 @@ All colors MUST be HSL.
 }
 
 @layer components {
+  /* Global custom scrollbar styles (applies everywhere) */
+  /* WebKit (Chrome, Safari, Edge) */
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px; /* horizontal */
+  }
+  *::-webkit-scrollbar-track {
+    background: hsl(var(--background));
+  }
+  *::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: 9999px;
+    border: 2px solid hsl(var(--background));
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--foreground) / 0.25);
+  }
+
+  /* Firefox */
+  * {
+    scrollbar-width: thin; /* auto | thin | none */
+    scrollbar-color: hsl(var(--border)) hsl(var(--background));
+  }
+
+  /* Utility class for subtle, rounded scrollbars on scrollable containers */
+  .scrollbar-rounded {
+    scrollbar-gutter: stable;
+  }
+
+  /* Hide scrollbar but keep scrolling when needed */
   /* Story link animation */
   .story-link {
     @apply relative inline-block after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-0.5 after:bottom-0 after:left-0 after:bg-primary after:origin-bottom-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-bottom-left;

@@ -10,6 +10,9 @@ import {
   Key,
   Users,
   Zap,
+  Moon,
+  Sun,
+  Monitor,
 } from "lucide-react";
 import {
   Card,
@@ -33,17 +36,19 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { useTheme } from "@/providers/ThemeProvider";
+import { useNotifications } from "@/contexts/NotificationContext";
 
 export default function Settings() {
-  const [generalSettings, setGeneralSettings] = useState({
-    siteName: "Albedo AI Documentation",
-    siteDescription:
-      "Comprehensive documentation and support for Albedo AI platform",
-    siteUrl: "https://docs.albedoai.com",
-    adminEmail: "admin@albedoai.com",
-    timezone: "UTC",
-    language: "en",
-  });
+  const { theme, setTheme } = useTheme();
+  const {
+    notificationSettings,
+    updateNotificationSettings,
+    browserNotificationPermission,
+    requestBrowserNotificationPermission,
+    testBrowserNotification,
+    isBrowserNotificationSupported,
+  } = useNotifications();
 
   const [securitySettings, setSecuritySettings] = useState({
     requireEmailVerification: true,
@@ -52,15 +57,6 @@ export default function Settings() {
     sessionTimeout: 30,
     maxLoginAttempts: 5,
     passwordMinLength: 8,
-  });
-
-  const [notificationSettings, setNotificationSettings] = useState({
-    emailNotifications: true,
-    slackNotifications: false,
-    webhookNotifications: true,
-    newUserNotifications: true,
-    feedbackNotifications: true,
-    systemAlerts: true,
   });
 
   const [apiSettings, setApiSettings] = useState({
@@ -72,11 +68,6 @@ export default function Settings() {
     webhookSecret: "whsec_1234567890abcdef",
   });
 
-  const handleSave = () => {
-    // Simulate save operation
-    console.log("Saving settings...");
-  };
-
   return (
     <div className="space-y-8">
       {/* Header - Add padding-top on mobile to avoid sidebar button overlap */}
@@ -87,10 +78,6 @@ export default function Settings() {
             Configure system-wide settings and preferences
           </p>
         </div>
-        <Button onClick={handleSave} className="w-full sm:w-auto">
-          <Save className="h-4 w-4 mr-2" />
-          Save Changes
-        </Button>
       </div>
 
       <Tabs defaultValue="general" className="space-y-6">
@@ -102,13 +89,13 @@ export default function Settings() {
             <SettingsIcon className="h-4 w-4 flex-shrink-0" />
             <span className="hidden sm:inline truncate">General</span>
           </TabsTrigger>
-          <TabsTrigger
+          {/* <TabsTrigger
             value="security"
             className="flex items-center justify-center gap-2 py-2.5"
           >
             <Shield className="h-4 w-4 flex-shrink-0" />
             <span className="hidden sm:inline truncate">Security</span>
-          </TabsTrigger>
+          </TabsTrigger> */}
           <TabsTrigger
             value="notifications"
             className="flex items-center justify-center gap-2 py-2.5"
@@ -116,13 +103,13 @@ export default function Settings() {
             <Bell className="h-4 w-4 flex-shrink-0" />
             <span className="hidden sm:inline truncate">Notifications</span>
           </TabsTrigger>
-          <TabsTrigger
+          {/* <TabsTrigger
             value="api"
             className="flex items-center justify-center gap-2 py-2.5"
           >
             <Key className="h-4 w-4 flex-shrink-0" />
             <span className="hidden sm:inline truncate">API</span>
-          </TabsTrigger>
+          </TabsTrigger> */}
         </TabsList>
 
         {/* General Settings */}
@@ -134,100 +121,42 @@ export default function Settings() {
                 General Settings
               </CardTitle>
               <CardDescription>
-                Basic site configuration and branding
+                Basic site configuration and preferences
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="siteName">Site Name</Label>
-                  <Input
-                    id="siteName"
-                    value={generalSettings.siteName}
-                    onChange={(e) =>
-                      setGeneralSettings({
-                        ...generalSettings,
-                        siteName: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="siteUrl">Site URL</Label>
-                  <Input
-                    id="siteUrl"
-                    value={generalSettings.siteUrl}
-                    onChange={(e) =>
-                      setGeneralSettings({
-                        ...generalSettings,
-                        siteUrl: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-              </div>
-
               <div className="space-y-2">
-                <Label htmlFor="siteDescription">Site Description</Label>
-                <Textarea
-                  id="siteDescription"
-                  value={generalSettings.siteDescription}
-                  onChange={(e) =>
-                    setGeneralSettings({
-                      ...generalSettings,
-                      siteDescription: e.target.value,
-                    })
+                <Label htmlFor="theme">Theme</Label>
+                <Select
+                  value={theme}
+                  onValueChange={(value) =>
+                    setTheme(value as "light" | "dark" | "system")
                   }
-                  rows={3}
-                />
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="adminEmail">Admin Email</Label>
-                  <Input
-                    id="adminEmail"
-                    type="email"
-                    value={generalSettings.adminEmail}
-                    onChange={(e) =>
-                      setGeneralSettings({
-                        ...generalSettings,
-                        adminEmail: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="timezone">Timezone</Label>
-                  <Select
-                    value={generalSettings.timezone}
-                    onValueChange={(value) =>
-                      setGeneralSettings({
-                        ...generalSettings,
-                        timezone: value,
-                      })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="UTC">UTC</SelectItem>
-                      <SelectItem value="America/New_York">
-                        Eastern Time
-                      </SelectItem>
-                      <SelectItem value="America/Chicago">
-                        Central Time
-                      </SelectItem>
-                      <SelectItem value="America/Denver">
-                        Mountain Time
-                      </SelectItem>
-                      <SelectItem value="America/Los_Angeles">
-                        Pacific Time
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="light">
+                      <div className="flex items-center gap-2">
+                        <Sun className="h-4 w-4" />
+                        Light
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="dark">
+                      <div className="flex items-center gap-2">
+                        <Moon className="h-4 w-4" />
+                        Dark
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="system">
+                      <div className="flex items-center gap-2">
+                        <Monitor className="h-4 w-4" />
+                        System
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </CardContent>
           </Card>
@@ -372,124 +301,198 @@ export default function Settings() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label>Email Notifications</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Send notifications via email
-                    </p>
+              <div className="space-y-6">
+                {/* Support Request Notifications */}
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium text-muted-foreground">
+                    Support Request Notifications
+                  </h4>
+
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>Email Notifications</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Get notified via email when new support requests are
+                        submitted
+                      </p>
+                    </div>
+                    <Switch
+                      checked={
+                        notificationSettings?.email_support_requests ?? true
+                      }
+                      onCheckedChange={(checked) =>
+                        updateNotificationSettings({
+                          email_support_requests: checked,
+                        })
+                      }
+                    />
                   </div>
-                  <Switch
-                    checked={notificationSettings.emailNotifications}
-                    onCheckedChange={(checked) =>
-                      setNotificationSettings({
-                        ...notificationSettings,
-                        emailNotifications: checked,
-                      })
-                    }
-                  />
+
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>System Alerts</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Show system alerts for new support requests
+                      </p>
+                    </div>
+                    <Switch
+                      checked={
+                        notificationSettings?.system_support_requests ?? true
+                      }
+                      onCheckedChange={(checked) =>
+                        updateNotificationSettings({
+                          system_support_requests: checked,
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>Browser Notifications</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Show browser push notifications (even when tab is
+                        closed)
+                      </p>
+                    </div>
+                    <Switch
+                      checked={
+                        notificationSettings?.browser_support_requests ?? true
+                      }
+                      onCheckedChange={(checked) =>
+                        updateNotificationSettings({
+                          browser_support_requests: checked,
+                        })
+                      }
+                    />
+                  </div>
                 </div>
 
                 <Separator />
 
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label>Slack Notifications</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Send notifications to Slack channels
-                    </p>
+                {/* User Creation Notifications */}
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium text-muted-foreground">
+                    User Creation Notifications
+                  </h4>
+
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>Email Notifications</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Get notified via email when new users are created
+                      </p>
+                    </div>
+                    <Switch
+                      checked={notificationSettings?.email_user_created ?? true}
+                      onCheckedChange={(checked) =>
+                        updateNotificationSettings({
+                          email_user_created: checked,
+                        })
+                      }
+                    />
                   </div>
-                  <Switch
-                    checked={notificationSettings.slackNotifications}
-                    onCheckedChange={(checked) =>
-                      setNotificationSettings({
-                        ...notificationSettings,
-                        slackNotifications: checked,
-                      })
-                    }
-                  />
+
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>System Alerts</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Show system alerts when new users are created
+                      </p>
+                    </div>
+                    <Switch
+                      checked={
+                        notificationSettings?.system_user_created ?? true
+                      }
+                      onCheckedChange={(checked) =>
+                        updateNotificationSettings({
+                          system_user_created: checked,
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>Browser Notifications</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Show browser push notifications (even when tab is
+                        closed)
+                      </p>
+                    </div>
+                    <Switch
+                      checked={
+                        notificationSettings?.browser_user_created ?? true
+                      }
+                      onCheckedChange={(checked) =>
+                        updateNotificationSettings({
+                          browser_user_created: checked,
+                        })
+                      }
+                    />
+                  </div>
                 </div>
 
                 <Separator />
 
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label>Webhook Notifications</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Send notifications via webhooks
-                    </p>
+                {/* Browser Notification Permission */}
+                {isBrowserNotificationSupported() && (
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-medium text-muted-foreground">
+                      Browser Notification Permission
+                    </h4>
+
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label>Browser Notifications</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Allow browser push notifications (works even when tab
+                          is closed)
+                        </p>
+                        <Badge
+                          variant={
+                            browserNotificationPermission === "granted"
+                              ? "default"
+                              : browserNotificationPermission === "denied"
+                              ? "destructive"
+                              : "secondary"
+                          }
+                        >
+                          {browserNotificationPermission === "granted"
+                            ? "Enabled"
+                            : browserNotificationPermission === "denied"
+                            ? "Blocked"
+                            : "Not Requested"}
+                        </Badge>
+                      </div>
+                      <div className="flex gap-2">
+                        {browserNotificationPermission !== "granted" && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={requestBrowserNotificationPermission}
+                            disabled={
+                              browserNotificationPermission === "denied"
+                            }
+                          >
+                            {browserNotificationPermission === "denied"
+                              ? "Blocked by Browser"
+                              : "Enable Notifications"}
+                          </Button>
+                        )}
+                        {browserNotificationPermission === "granted" && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={testBrowserNotification}
+                          >
+                            Test Notification
+                          </Button>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <Switch
-                    checked={notificationSettings.webhookNotifications}
-                    onCheckedChange={(checked) =>
-                      setNotificationSettings({
-                        ...notificationSettings,
-                        webhookNotifications: checked,
-                      })
-                    }
-                  />
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label>New User Notifications</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Notify when new users register
-                    </p>
-                  </div>
-                  <Switch
-                    checked={notificationSettings.newUserNotifications}
-                    onCheckedChange={(checked) =>
-                      setNotificationSettings({
-                        ...notificationSettings,
-                        newUserNotifications: checked,
-                      })
-                    }
-                  />
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label>Feedback Notifications</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Notify when new feedback is received
-                    </p>
-                  </div>
-                  <Switch
-                    checked={notificationSettings.feedbackNotifications}
-                    onCheckedChange={(checked) =>
-                      setNotificationSettings({
-                        ...notificationSettings,
-                        feedbackNotifications: checked,
-                      })
-                    }
-                  />
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label>System Alerts</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Notify about system issues and updates
-                    </p>
-                  </div>
-                  <Switch
-                    checked={notificationSettings.systemAlerts}
-                    onCheckedChange={(checked) =>
-                      setNotificationSettings({
-                        ...notificationSettings,
-                        systemAlerts: checked,
-                      })
-                    }
-                  />
-                </div>
+                )}
               </div>
             </CardContent>
           </Card>
