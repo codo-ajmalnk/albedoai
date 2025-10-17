@@ -150,13 +150,13 @@ export default function DocsIndex() {
           </p>
 
           {/* Search */}
-          <div className="relative max-w-lg">
+          <div className="relative w-full max-w-2xl">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search documentation..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 h-12 text-base"
+              className="pl-10 h-12 text-base w-full"
             />
           </div>
         </div>
