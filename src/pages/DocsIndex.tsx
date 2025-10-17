@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, BookOpen, Zap, Shield, CreditCard, FileText, ArrowRight, Github, ExternalLink, ChevronRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Spotlight } from '@/components/ui/spotlight';
+import { BentoGrid, BentoCard } from '@/components/ui/bento-grid';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -64,25 +66,56 @@ export default function DocsIndex() {
     <div className="cursor-docs-main">
       {/* Hero Section */}
       <div className="mb-16">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold tracking-tight mb-4 text-foreground">
-            Albedo AI Documentation
-          </h1>
-          <p className="text-xl text-muted-foreground mb-8 max-w-3xl">
-            Everything you need to know about using Albedo AI. From quick starts to advanced features and API reference.
-          </p>
-          
-          {/* Search */}
-          <div className="relative max-w-lg">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search documentation..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 h-12 text-base"
-            />
+        <Spotlight className="p-8 md:p-12">
+          <div className="mb-8">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-foreground">
+              Albedo AI Documentation
+            </h1>
+            <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-3xl">
+              Everything you need to know about using Albedo AI. From quick starts to advanced features and API reference.
+            </p>
+            {/* Search */}
+            <div className="relative w-full">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search documentation..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 h-12 text-base w-full"
+              />
+            </div>
           </div>
-        </div>
+          {/* Feature highlights */}
+          <BentoGrid>
+            <BentoCard>
+              <div className="space-y-2">
+                <div className="text-sm text-muted-foreground">Get started</div>
+                <div className="text-xl font-semibold">Install in minutes</div>
+                <p className="text-sm text-muted-foreground">Follow our step-by-step guide to integrate quickly.</p>
+              </div>
+            </BentoCard>
+            <BentoCard>
+              <div className="space-y-2">
+                <div className="text-sm text-muted-foreground">Performance</div>
+                <div className="text-xl font-semibold">Fast and reliable</div>
+                <p className="text-sm text-muted-foreground">Optimized components and best practices out of the box.</p>
+              </div>
+            </BentoCard>
+            <BentoCard colSpan="md:col-span-6">
+              <div className="flex items-center justify-between gap-4 flex-col md:flex-row">
+                <div className="space-y-2">
+                  <div className="text-sm text-muted-foreground">Open Source</div>
+                  <div className="text-xl font-semibold">Contribute on GitHub</div>
+                  <p className="text-sm text-muted-foreground">Explore examples and contribute improvements.</p>
+                </div>
+                <a href="https://github.com/albedoedu" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-primary">
+                  <span>View repo</span>
+                  <ArrowRight className="h-4 w-4" />
+                </a>
+              </div>
+            </BentoCard>
+          </BentoGrid>
+        </Spotlight>
 
         {/* Quick Start */}
         <div className="mb-12">
