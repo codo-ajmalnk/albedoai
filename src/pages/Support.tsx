@@ -1,15 +1,34 @@
-import { useState, useEffect } from 'react';
-import { Send, MessageCircle, Clock, CheckCircle, ExternalLink, Search } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
+import { useState, useEffect } from "react";
+import {
+  Send,
+  MessageCircle,
+  Clock,
+  CheckCircle,
+  ExternalLink,
+  Search,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
 
 interface Category {
-  id: string;
+  id: number;
   name: string;
   color: string;
 }
@@ -23,70 +42,79 @@ interface Article {
 }
 
 const defaultCategories = [
-  { value: 'general', label: 'General Question' },
-  { value: 'technical', label: 'Technical Issue' },
-  { value: 'billing', label: 'Billing Support' },
-  { value: 'feature', label: 'Feature Request' },
-  { value: 'bug', label: 'Bug Report' },
+  { value: "general", label: "General Question" },
+  { value: "technical", label: "Technical Issue" },
+  { value: "billing", label: "Billing Support" },
+  { value: "feature", label: "Feature Request" },
+  { value: "bug", label: "Bug Report" },
 ];
 
 export default function Support() {
   const [formData, setFormData] = useState({
-    email: '',
-    name: '',
-    category: '',
-    subject: '',
-    message: '',
+    email: "",
+    name: "",
+    category: "",
+    subject: "",
+    message: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [submittedToken, setSubmittedToken] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Load categories on component mount
+  const [allArticles, setAllArticles] = useState<Article[]>([]);
+
+  // Load categories and articles on component mount
   useEffect(() => {
-    const loadCategories = async () => {
+    const loadData = async () => {
       try {
-        const response = await fetch('/api/categories');
-        if (response.ok) {
-          const data = await response.json();
-          setCategories(data.categories || []);
+        const baseUrl = import.meta.env.VITE_API_URL || "";
+
+        // Fetch categories
+        const categoriesResponse = await fetch(`${baseUrl}/api/categories`);
+        if (categoriesResponse.ok) {
+          const categoriesData = await categoriesResponse.json();
+          setCategories(categoriesData);
+        }
+
+        // Fetch published articles
+        const articlesResponse = await fetch(
+          `${baseUrl}/api/articles?is_published=true`
+        );
+        if (articlesResponse.ok) {
+          const articlesData = await articlesResponse.json();
+          setAllArticles(articlesData);
         }
       } catch (error) {
-        console.error('Failed to load categories:', error);
+        console.error("Failed to load data:", error);
       }
     };
-    loadCategories();
+    loadData();
   }, []);
 
-  // Search articles
-  const searchArticles = async (query: string) => {
+  // Search articles (client-side filtering)
+  const searchArticles = (query: string) => {
     if (!query.trim()) {
       setArticles([]);
       setShowSearchResults(false);
       return;
     }
 
-    try {
-      const response = await fetch('/api/search/articles', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ query, limit: 5 }),
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setArticles(data.results || []);
-        setShowSearchResults(true);
-      }
-    } catch (error) {
-      console.error('Search failed:', error);
-    }
+    const lowerQuery = query.toLowerCase();
+    const filtered = allArticles
+      .filter(
+        (article) =>
+          article.title.toLowerCase().includes(lowerQuery) ||
+          article.excerpt?.toLowerCase().includes(lowerQuery) ||
+          article.category.name.toLowerCase().includes(lowerQuery)
+      )
+      .slice(0, 5); // Limit to 5 results
+
+    setArticles(filtered);
+    setShowSearchResults(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -94,10 +122,11 @@ export default function Support() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/feedback/submit', {
-        method: 'POST',
+      const baseUrl = import.meta.env.VITE_API_URL || "";
+      const response = await fetch(`${baseUrl}/api/feedback/submit`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           email: formData.email,
@@ -112,18 +141,25 @@ export default function Support() {
         const data = await response.json();
         setSubmittedToken(data.feedback.token);
         toast({
-          title: 'Support request submitted',
-          description: 'We\'ll get back to you within 24 hours. Check your email for confirmation.',
+          title: "Support request submitted",
+          description:
+            "We'll get back to you within 24 hours. Check your email for confirmation.",
         });
-        setFormData({ email: '', name: '', category: '', subject: '', message: '' });
+        setFormData({
+          email: "",
+          name: "",
+          category: "",
+          subject: "",
+          message: "",
+        });
       } else {
-        throw new Error('Submission failed');
+        throw new Error("Submission failed");
       }
     } catch (error) {
       toast({
-        title: 'Submission failed',
-        description: 'Please try again or contact us directly.',
-        variant: 'destructive',
+        title: "Submission failed",
+        description: "Please try again or contact us directly.",
+        variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);
@@ -131,7 +167,7 @@ export default function Support() {
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -140,7 +176,8 @@ export default function Support() {
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold mb-4">Get Support</h1>
         <p className="text-xl text-foreground-muted max-w-2xl mx-auto">
-          Need help? We're here to assist you. Submit a support request and our team will get back to you quickly.
+          Need help? We're here to assist you. Submit a support request and our
+          team will get back to you quickly.
         </p>
       </div>
 
@@ -152,7 +189,8 @@ export default function Support() {
             Search Documentation
           </CardTitle>
           <CardDescription>
-            Before submitting a support request, try searching our documentation for existing solutions.
+            Before submitting a support request, try searching our documentation
+            for existing solutions.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -169,28 +207,34 @@ export default function Support() {
                 className="pl-10"
               />
             </div>
-            
+
             {showSearchResults && (
               <div className="space-y-2">
                 {articles.length > 0 ? (
                   <>
-                    <p className="text-sm text-muted-foreground">Found {articles.length} related articles:</p>
+                    <p className="text-sm text-muted-foreground">
+                      Found {articles.length} related articles:
+                    </p>
                     {articles.map((article) => (
                       <div
                         key={article.id}
                         className="p-3 border rounded-lg hover:bg-secondary/50 transition-colors cursor-pointer"
-                        onClick={() => window.open(`/docs/${article.slug}`, '_blank')}
+                        onClick={() =>
+                          window.open(`/docs/${article.slug}`, "_blank")
+                        }
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
-                              <span className="font-medium text-sm">{article.title}</span>
-                              <Badge 
-                                variant="outline" 
+                              <span className="font-medium text-sm">
+                                {article.title}
+                              </span>
+                              <Badge
+                                variant="outline"
                                 className="text-xs"
-                                style={{ 
+                                style={{
                                   borderColor: article.category.color,
-                                  color: article.category.color 
+                                  color: article.category.color,
                                 }}
                               >
                                 {article.category.name}
@@ -206,7 +250,9 @@ export default function Support() {
                     ))}
                   </>
                 ) : (
-                  <p className="text-sm text-muted-foreground">No articles found. Try a different search term.</p>
+                  <p className="text-sm text-muted-foreground">
+                    No articles found. Try a different search term.
+                  </p>
                 )}
               </div>
             )}
@@ -235,7 +281,9 @@ export default function Support() {
                       id="email"
                       type="email"
                       value={formData.email}
-                      onChange={(e) => handleInputChange('email', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("email", e.target.value)
+                      }
                       placeholder="your.email@example.com"
                       required
                     />
@@ -247,7 +295,9 @@ export default function Support() {
                     <Input
                       id="name"
                       value={formData.name}
-                      onChange={(e) => handleInputChange('name', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("name", e.target.value)
+                      }
                       placeholder="Your name"
                     />
                   </div>
@@ -257,24 +307,33 @@ export default function Support() {
                   <label htmlFor="category" className="text-sm font-medium">
                     Category *
                   </label>
-                  <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
+                  <Select
+                    value={formData.category}
+                    onValueChange={(value) =>
+                      handleInputChange("category", value)
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select a category" />
                     </SelectTrigger>
                     <SelectContent>
-                      {categories.length > 0 ? (
-                        categories.map((category) => (
-                          <SelectItem key={category.id} value={category.id}>
-                            {category.name}
-                          </SelectItem>
-                        ))
-                      ) : (
-                        defaultCategories.map((category) => (
-                          <SelectItem key={category.value} value={category.value}>
-                            {category.label}
-                          </SelectItem>
-                        ))
-                      )}
+                      {categories.length > 0
+                        ? categories.map((category) => (
+                            <SelectItem
+                              key={category.id}
+                              value={category.id.toString()}
+                            >
+                              {category.name}
+                            </SelectItem>
+                          ))
+                        : defaultCategories.map((category) => (
+                            <SelectItem
+                              key={category.value}
+                              value={category.value}
+                            >
+                              {category.label}
+                            </SelectItem>
+                          ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -286,7 +345,9 @@ export default function Support() {
                   <Input
                     id="subject"
                     value={formData.subject}
-                    onChange={(e) => handleInputChange('subject', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("subject", e.target.value)
+                    }
                     placeholder="Brief description of your issue"
                     required
                   />
@@ -299,7 +360,9 @@ export default function Support() {
                   <Textarea
                     id="message"
                     value={formData.message}
-                    onChange={(e) => handleInputChange('message', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("message", e.target.value)
+                    }
                     placeholder="Please provide as much detail as possible about your issue or question..."
                     rows={6}
                     required
@@ -342,21 +405,27 @@ export default function Support() {
                 <div className="h-2 w-2 rounded-full bg-success" />
                 <div>
                   <div className="font-medium text-sm">General Questions</div>
-                  <div className="text-sm text-foreground-muted">Usually within 4 hours</div>
+                  <div className="text-sm text-foreground-muted">
+                    Usually within 4 hours
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <div className="h-2 w-2 rounded-full bg-warning" />
                 <div>
                   <div className="font-medium text-sm">Technical Issues</div>
-                  <div className="text-sm text-foreground-muted">Usually within 2 hours</div>
+                  <div className="text-sm text-foreground-muted">
+                    Usually within 2 hours
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <div className="h-2 w-2 rounded-full bg-destructive" />
                 <div>
                   <div className="font-medium text-sm">Critical Issues</div>
-                  <div className="text-sm text-foreground-muted">Usually within 1 hour</div>
+                  <div className="text-sm text-foreground-muted">
+                    Usually within 1 hour
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -372,19 +441,27 @@ export default function Support() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <div className="font-medium text-sm">WhatsApp</div>
-                <div className="text-sm text-foreground-muted">+91 0000000000</div>
+                <div className="text-sm text-foreground-muted">
+                  +91 0000000000
+                </div>
               </div>
               <div className="space-y-2">
                 <div className="font-medium text-sm">Email Support</div>
-                <div className="text-sm text-foreground-muted">support@albedoedu.com</div>
+                <div className="text-sm text-foreground-muted">
+                  support@albedoedu.com
+                </div>
               </div>
               <div className="space-y-2">
                 <div className="font-medium text-sm">Community Forum</div>
-                <div className="text-sm text-foreground-muted">Join our community for peer support</div>
+                <div className="text-sm text-foreground-muted">
+                  Join our community for peer support
+                </div>
               </div>
               <div className="space-y-2">
                 <div className="font-medium text-sm">Documentation</div>
-                <div className="text-sm text-foreground-muted">Check our comprehensive docs first</div>
+                <div className="text-sm text-foreground-muted">
+                  Check our comprehensive docs first
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -400,16 +477,21 @@ export default function Support() {
                   Request Submitted Successfully
                 </CardTitle>
                 <CardDescription>
-                  Your support request has been received. You can track its status using the link below.
+                  Your support request has been received. You can track its
+                  status using the link below.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <p className="text-sm text-muted-foreground">
-                    We've sent a confirmation email to <strong>{formData.email}</strong> with your tracking information.
+                    We've sent a confirmation email to{" "}
+                    <strong>{formData.email}</strong> with your tracking
+                    information.
                   </p>
                   <div className="p-4 bg-secondary rounded-lg">
-                    <p className="text-sm font-medium mb-2">Track your request:</p>
+                    <p className="text-sm font-medium mb-2">
+                      Track your request:
+                    </p>
                     <div className="flex items-center gap-2">
                       <Input
                         value={`${window.location.origin}/support/track/${submittedToken}`}
@@ -420,10 +502,12 @@ export default function Support() {
                         variant="outline"
                         size="sm"
                         onClick={() => {
-                          navigator.clipboard.writeText(`${window.location.origin}/support/track/${submittedToken}`);
+                          navigator.clipboard.writeText(
+                            `${window.location.origin}/support/track/${submittedToken}`
+                          );
                           toast({
-                            title: 'Link copied',
-                            description: 'Tracking link copied to clipboard.',
+                            title: "Link copied",
+                            description: "Tracking link copied to clipboard.",
                           });
                         }}
                       >
@@ -433,7 +517,9 @@ export default function Support() {
                   </div>
                   <Button
                     variant="outline"
-                    onClick={() => window.open(`/support/track/${submittedToken}`, '_blank')}
+                    onClick={() =>
+                      window.open(`/support/track/${submittedToken}`, "_blank")
+                    }
                     className="w-full"
                   >
                     <ExternalLink className="h-4 w-4 mr-2" />

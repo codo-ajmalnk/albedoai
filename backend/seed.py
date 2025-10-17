@@ -17,43 +17,88 @@ def seed():
     with SessionLocal() as db:
         # Seed categories
         categories = [
-            ("Getting Started", "#3b82f6"),
-            ("Installation", "#10b981"),
-            ("FAQ", "#f59e0b"),
-            ("Troubleshooting", "#ef4444"),
+            ("Getting Started", "Basic setup and initial configuration guides", "#3b82f6"),
+            ("Installation", "Step-by-step installation instructions", "#10b981"),
+            ("FAQ", "Frequently asked questions and answers", "#f59e0b"),
+            ("Troubleshooting", "Common issues and their solutions", "#ef4444"),
         ]
         existing = {c.name for c in db.query(Category).all()}
-        for name, color in categories:
+        for name, description, color in categories:
             if name not in existing:
-                db.add(Category(name=name, color=color))
+                db.add(Category(name=name, description=description, color=color))
         db.commit()
 
         # Get categories
         cat_map = {c.name: c for c in db.query(Category).all()}
 
-        # Seed articles (examples)
+        # Seed articles (examples with content blocks)
         articles = [
             {
                 "title": "Albedo Support: Getting Started",
-                "slug": "docs/getting-started",
+                "slug": "getting-started",
                 "excerpt": "Learn the basics of Albedo Support platform and key features.",
-                "content": "This guide helps you start with Albedo support docs, search, and feedback.",
+                "content": [
+                    {
+                        "title": "Welcome to Albedo Support",
+                        "description": "This guide helps you start with Albedo support docs, search, and feedback features. Get familiar with the platform basics.",
+                        "images": None,
+                        "videos": None,
+                    },
+                    {
+                        "title": "Key Features",
+                        "description": "Explore documentation articles, search functionality, and submit feedback to improve your experience.",
+                        "images": None,
+                        "videos": None,
+                    },
+                ],
                 "url": None,
                 "category": "Getting Started",
             },
             {
                 "title": "Install Albedo Support",
-                "slug": "docs/installation",
+                "slug": "installation",
                 "excerpt": "Step-by-step installation instructions for Albedo Support.",
-                "content": "Install prerequisites, configure environment, and run the app.",
+                "content": [
+                    {
+                        "title": "Prerequisites",
+                        "description": "Install Node.js, Python 3.10+, and MySQL before proceeding with the installation.",
+                        "images": None,
+                        "videos": None,
+                    },
+                    {
+                        "title": "Environment Configuration",
+                        "description": "Configure your environment variables and database connection settings in the .env file.",
+                        "images": None,
+                        "videos": None,
+                    },
+                    {
+                        "title": "Run the Application",
+                        "description": "Start the backend server with 'python -m backend.main' and the frontend with 'npm run dev'.",
+                        "images": None,
+                        "videos": None,
+                    },
+                ],
                 "url": None,
                 "category": "Installation",
             },
             {
                 "title": "FAQ: Common Questions",
-                "slug": "docs/faq",
+                "slug": "faq",
                 "excerpt": "Frequently asked questions about Albedo Support.",
-                "content": "Explore answers to common usage and setup questions.",
+                "content": [
+                    {
+                        "title": "What is Albedo Support?",
+                        "description": "Albedo Support is a comprehensive documentation and support platform designed to help users find answers quickly and efficiently.",
+                        "images": None,
+                        "videos": None,
+                    },
+                    {
+                        "title": "How do I search for articles?",
+                        "description": "Use the search bar at the top of the page to find articles by keywords. The search results will show the most relevant articles.",
+                        "images": None,
+                        "videos": None,
+                    },
+                ],
                 "url": None,
                 "category": "FAQ",
             },
@@ -68,6 +113,7 @@ def seed():
                     title=a["title"],
                     slug=a["slug"],
                     excerpt=a["excerpt"],
+                    # Content is now an array of content blocks
                     content=a["content"],
                     url=a["url"],
                     category_id=cat_map[a["category"].strip()].id,
